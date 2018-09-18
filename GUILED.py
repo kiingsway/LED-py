@@ -15,6 +15,8 @@ import argparse
 
 import threading
 
+from decimal import *
+
 # LED strip configuration:
 LED_COUNT      = 120      # Number of LED pixels.
 LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
@@ -28,6 +30,9 @@ LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 win = Tk()
 
 ledBtn = [0] * LED_COUNT
+
+BPM = 128
+bpm4 = Decimal(60)/Decimal(BPM)
 
 #myFont = Font(family = 'Helvetica', size = 36, weight = 'bold')
 
@@ -53,7 +58,7 @@ def key(event):
         ef2 = threading.Thread(target=hihat)
         ef2.start()
     if (evento == "'3'"):
-        ef3 = threading.Thread(target=BASS)
+        ef3 = threading.Thread(target=bpmtest)
         ef3.start()
     if (evento == "'4'"):
         ef4 = threading.Thread(target=bassLBaixoTouca)
@@ -99,6 +104,16 @@ def cobra(R, G, B, pontoA, pontoB, velocidade, sobeDesce):
             strip.show()
             time.sleep(velocidade)
 
+def bpmtest():
+    for i in range(2):
+        bracoUp()
+        time.sleep(bpm4/8)
+        hihat()
+        time.sleep(bpm4/8)
+        bracoDown()
+        time.sleep(bpm4/8)
+        hihat()
+        time.sleep(bpm4/8)
 
 def TAN():
     luz(100,100,0,60,120)
@@ -193,7 +208,6 @@ def bracoDown():
         
     for i in range(4,0,-1):
         for j in range(120-(13*(i-1)), 120-(13*i),-1):
-            print j
             strip.setPixelColor(j, Color(0,0,0))
         strip.show()
         time.sleep(delay)
