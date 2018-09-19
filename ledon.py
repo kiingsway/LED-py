@@ -45,7 +45,7 @@ ledp, rpin, gpin, bpin = ["" for _ in range(4)]
 def off():
         for i in range(LED_COUNT):
                 strip.setPixelColor(i, Color(0,0,0))
-                strip.show()
+        strip.show()
         print("desliguei")
 
 

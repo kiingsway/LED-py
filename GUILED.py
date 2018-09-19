@@ -31,7 +31,7 @@ win = Tk()
 
 ledBtn = [0] * LED_COUNT
 
-BPM = 128
+BPM = 110
 bpm4 = Decimal(60)/Decimal(BPM)
 
 #myFont = Font(family = 'Helvetica', size = 36, weight = 'bold')
@@ -76,7 +76,7 @@ def key(event):
         ef8 = threading.Thread(target=tresPontosInvert)
         ef8.start()
     if (evento == "'9'"):
-        ef9 = threading.Thread(target=bracoUp)
+        ef9 = threading.Thread(target=bracoUp,args=(0.025,))
         ef9.start()
     if (evento == "'0'"):
         ef10 = threading.Thread(target=bracoDown)
@@ -105,15 +105,19 @@ def cobra(R, G, B, pontoA, pontoB, velocidade, sobeDesce):
             time.sleep(velocidade)
 
 def bpmtest():
-    for i in range(2):
-        bracoUp()
-        time.sleep(bpm4/8)
-        hihat()
-        time.sleep(bpm4/8)
-        bracoDown()
-        time.sleep(bpm4/8)
-        hihat()
-        time.sleep(bpm4/8)
+    for i in range(5):
+    	bpmT1 = threading.Thread(target=bracoUp,args=(0.025,))
+    	bpmT1.start()
+        time.sleep(bpm4/2)
+        bpmT2 = threading.Thread(target=hihat,args=(0.025,))
+    	bpmT2.start()
+        time.sleep(bpm4/2)
+        bpmT3 = threading.Thread(target=bracoDown,args=(0.025,))
+    	bpmT3.start()
+        time.sleep(bpm4/2)
+        bpmT4 = threading.Thread(target=hihat,args=(0.025,))
+    	bpmT4.start()
+        time.sleep(bpm4/2)
 
 def TAN():
     luz(100,100,0,60,120)
@@ -184,33 +188,31 @@ def tresPontosInvert():
 	strip.show()
 	time.sleep(.05)
 
-def bracoUp():
-    delay = .025
+def bracoUp(vel):
     for i in range(1,5):
         for j in range(13*(i-1), 13*i):
             strip.setPixelColor(j, Color(100,100,100))
         strip.show()
-        time.sleep(delay)
+        time.sleep(vel)
         
     for i in range(4,0,-1):
         for j in range(13*(i-1), 13*i):
             strip.setPixelColor(j, Color(0,0,0))
         strip.show()
-        time.sleep(delay)
+        time.sleep(vel)
 
-def bracoDown():
-    delay = .025
+def bracoDown(vel):
     for i in range(1,5):
         for j in range(120-(13*(i-1)), 120-(13*i),-1):
             strip.setPixelColor(j, Color(100,100,100))
         strip.show()
-        time.sleep(delay)
+        time.sleep(vel)
         
     for i in range(4,0,-1):
         for j in range(120-(13*(i-1)), 120-(13*i),-1):
             strip.setPixelColor(j, Color(0,0,0))
         strip.show()
-        time.sleep(delay)
+        time.sleep(vel)
 
 def laser():
 	for i in range(14+2):
@@ -224,7 +226,7 @@ def laser():
             strip.show()
             time.sleep(.05)
 
-def hihat():
+def hihat(vel):
     for i in range(5):
         if i < 4:
             for j in range(60+12*i,60+12*(1+i)):
@@ -237,7 +239,7 @@ def hihat():
             for y in range(60-12*(i-1),60-12*i,-1):
                 strip.setPixelColor(y,Color(0,0,0))
         strip.show()
-        time.sleep(.05)
+        time.sleep(vel)
 
 win.title("Projeto LED em GUI")
 win.geometry('300x300')
