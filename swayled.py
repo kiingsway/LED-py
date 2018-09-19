@@ -36,7 +36,8 @@ strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, 
     # Intialize the library (must be called once before other functions).
 strip.begin()
 
-pontoA=pontoB=redLed=greenLed=blueLed = 0
+pontoA=pontoB=redLed=greenLed=blueLed=vel = 0
+
 
 window = Tk()
 window.title("Sway LED")
@@ -61,16 +62,9 @@ def testLED():
 	if txtB.get() == '': blueLed = 0
 	else: blueLed = int(txtB.get())
 
-	if cmbEffects.current() == 0:
-		acenderLEDEffect(pontoA,pontoB,redLed,greenLed,blueLed)
-
-
-def acenderLEDEffect(pontoA,pontoB,R,G,B):
-	print("Acender",pontoA,pontoB,R,G,B)
-	for i in range(pontoA,pontoB+1):
-		strip.setPixelColor(i,Color(B,R,G))
-	strip.show()
-
+	print("Teste:",pontoA,pontoB,redLed,greenLed,blueLed)
+	if cmbEffects.current() == 0: acenderLEDEffect(pontoA,pontoB,redLed,greenLed,blueLed)
+	if cmbEffects.current() == 1: graveLEDEffect(pontoA,pontoB,redLed,greenLed,blueLed)
 
 
 def insertEffect():
@@ -86,11 +80,14 @@ def insertEffect():
 	if txtB.get() == '': blueLed = 0
 	else: blueLed = int(txtB.get())
 	effect = cmbEffects.current()
+	if txtVel.get() == '': vel = 1
+	else: vel = float(txtVel.get())
+	if txtBPM.get() == '': bpm = 128
+	else: bpm = int(txtBPM.get())
+	bpm = 60/bpm
 
-	txtToList = redLed,greenLed,blueLed,pontoA,pontoB,effect
+	txtToList = redLed,greenLed,blueLed,pontoA,pontoB,effect,vel,bpm
 	lstEffects.insert(END, txtToList)
-
-
 
 def playLED():
 	for i in range(lstEffects.size()):
@@ -100,15 +97,34 @@ def playLED():
 		pA = lstEffects.get(i)[3]
 		pB = lstEffects.get(i)[4]
 		ef = lstEffects.get(i)[5]
-		
+		vel = lstEffects.get(i)[6]
+		bpm = lstEffects.get(i)[7]
 
 		if ef == 0:	acenderLEDEffect(pA,pB,R,G,B)
-		time.sleep(1)
+		if ef == 1:	graveLEDEffect(pA,pB,R,G,B,vel)
+		print("Wait BPM:",bpm)
+		time.sleep(bpm)
 
 def off():
 	for i in range(LED_COUNT):
 		strip.setPixelColor(i, Color(0,0,0))
 	strip.show()
+
+def acenderLEDEffect(pontoA,pontoB,R,G,B):
+	for i in range(pontoA,pontoB+1):
+		strip.setPixelColor(i,Color(B,R,G))
+	strip.show()
+
+def graveLEDEffect(pontoA,pontoB,R,G,B,vel):
+	acenderLEDEffect(pontoA,pontoB,R,G,B)
+	for brightness in range(255,-1,-15):
+		strip.setBrightness(brightness)
+		strip.show()
+		time.sleep(vel)
+	off()
+	strip.setBrightness(LED_BRIGHTNESS)
+
+
 
 menu = Menu(window)
 new_item = Menu(menu)
