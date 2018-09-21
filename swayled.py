@@ -4,10 +4,12 @@ import os
 import sys
 import ttk
 import time
+import Tkinter
 import argparse
 import threading
 import tkMessageBox
 
+from recipe import *
 from Tkinter import *
 from decimal import *
 from neopixel import *
@@ -25,9 +27,6 @@ LED_INVERT     = False   # True to invert the signal (when using NPN transistor 
 LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
 
-#BPM = 110
-#bpm4 = Decimal(60)/Decimal(BPM)
-
 # Process arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--clear', action='store_true', help='clear the display on exit')
@@ -42,8 +41,6 @@ pontoA=pontoB=redLed=greenLed=blueLed=vel = 0
 
 
 window = Tk()
-window.title("Sway LED")
-window.geometry('325x270')
 
 def validateFields():
 	if txtPontoA.get() == '':
@@ -67,9 +64,8 @@ def testLED():
 	else: vel = float(txtVel.get())
 	if txtBPM.get() == '': bpm = 128
 	else: bpm = int(txtBPM.get())
-	bpm = 60/bpm
+	bpm = Decimal(60)/Decimal(bpm)
 
-	print("Teste:",pontoA,pontoB,redLed,greenLed,blueLed)
 	if cmbEffects.current() == 0:
 		testThread = threading.Thread(target=acenderLEDEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,))
 		testThread.start()
@@ -80,7 +76,7 @@ def testLED():
 		testThread = threading.Thread(target=bracoLEDEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
 		testThread.start()
 	if cmbEffects.current() == 3:
-		testThread = threading.Thread(target=corteLEDEffect,args=(vel))
+		testThread = threading.Thread(target=corteLEDEffect,args=(redLed,greenLed,blueLed,vel,))
 		testThread.start()
 
 
@@ -90,41 +86,61 @@ def insertEffect(upd):
 	pontoA = int(txtPontoA.get())
 	if txtPontoB.get() == '': pontoB = pontoA
 	else: pontoB = int(txtPontoB.get())
+	
 	if txtR.get() == '': redLed = 0
 	else: redLed = int(txtR.get())
 	if txtG.get() == '': greenLed = 0
 	else: greenLed = int(txtG.get())
 	if txtB.get() == '': blueLed = 0
 	else: blueLed = int(txtB.get())
+
 	effect = cmbEffects.current()
 	if txtVel.get() == '': vel = 0.1
 	else: vel = float(txtVel.get())
 	if txtBPM.get() == '': bpm = 128
 	else: bpm = int(txtBPM.get())
-	bpm = 60/bpm
 
 	txtToList = redLed,greenLed,blueLed,pontoA,pontoB,effect,vel,bpm
+
+	tv.insert("", 2, "", values=(txtToList))
 
 	if upd: lstEffects.insert(lstEffects.curselection(), txtToList)
 	else: lstEffects.insert(END, txtToList)
 	
 
 def playLED():
-	for i in range(lstEffects.size()):
-		R = lstEffects.get(i)[0]
-		G = lstEffects.get(i)[1]
-		B = lstEffects.get(i)[2]
-		pA = lstEffects.get(i)[3]
-		pB = lstEffects.get(i)[4]
-		ef = lstEffects.get(i)[5]
-		vel = lstEffects.get(i)[6]
-		bpm = lstEffects.get(i)[7]
+	for i in v.get_children():
+                for child in tv.get_children():
+                        print(tv.item(child)["values"])
+                #print(tv.item(0)["values"])
 
-		if ef == 0:	acenderLEDEffect(pA,pB,R,G,B)
-		if ef == 1:	graveLEDEffect(pA,pB,R,G,B,vel)
-		if ef == 2:	bracoLEDEffect(pA,pB,R,G,B,vel)
-		if ef == 3:	corteLEDEffect(vel)
+                '''
+		R = tv.get(i)[0]
+		G = tv.get(i)[1]
+		B = tv.get(i)[2]
+		pA = tv.get(i)[3]
+		pB = tv.get(i)[4]
+		ef = tv.get(i)[5]
+		vel = tv.get(i)[6]
+		bpm = tv.get(i)[7]
+		bpm = Decimal(60)/Decimal(bpm)
+		print(R,G,B,pA,p,ef,vel,bpm)
+
+		if ef == 0:
+			playThread = threading.Thread(target=acenderLEDEffect,args=(pA,pB,R,G,B,))
+			playThread.start()
+		if ef == 1:
+			playThread = threading.Thread(target=graveLEDEffect,args=(pA,pB,R,G,B,vel,))
+			playThread.start()
+		if ef == 2:
+			playThread = threading.Thread(target=bracoLEDEffect,args=(pA,pB,R,G,B,vel,))
+			playThread.start()
+		if ef == 3:
+			playThread = threading.Thread(target=corteLEDEffect,args=(vel,))
+			playThread.start()
 		time.sleep(bpm)
+		'''
+		
 
 def off():
 	for i in range(LED_COUNT):
@@ -166,13 +182,13 @@ def updateList():
 	if lstEffects.curselection(): lstEffects.delete(lstEffects.curselection())
 	else: tkMessageBox.showinfo("Entrada necessaria", "Preciso saber qual trocarei")
 
-def corteLEDEffect(vel):
+def corteLEDEffect(R,G,B,vel):
     for i in range(5):
         if i < 4:
             for j in range(60+12*i,60+12*(1+i)):
-                strip.setPixelColor(j,Color(100,100,0))
+                strip.setPixelColor(j,Color(B,R,G))
             for y in range(60-(12*i),60-(12*(1+i)),-1):
-                strip.setPixelColor(y,Color(100,100,0))
+                strip.setPixelColor(y,Color(B,R,G))
         if i >= 1:
             for j in range(60+12*(i-1),60+12*i):
                 strip.setPixelColor(j,Color(0,0,0))
@@ -181,8 +197,10 @@ def corteLEDEffect(vel):
         strip.show()
         time.sleep(vel)	
 
+def on_select():
+	print("Itens:", len(tv.get_children("")))
 
-def restart_program():
+def restart_program(event):
     """Restarts the current program.
     Note: this function does not return. Any cleanup action (like
     saving data) must be done before calling this function."""
@@ -191,13 +209,13 @@ def restart_program():
 
 menu = Menu(window)
 new_item = Menu(menu)
-new_item.add_command(label='Abrir')
+new_item.add_command(label='Abrir',command=on_select)
 new_item.add_command(label='Salvar')
 new_item.add_command(label='Salvar como...')
 new_item.add_separator()
 new_item.add_command(label='Desligar LEDs',command=off)
 new_item.add_separator()
-new_item.add_command(label='Resetar App',command=restart_program)
+new_item.add_command(label='Resetar App',command=restart_program,accelerator="F9")
 new_item.add_command(label='Sobre')
 menu.add_cascade(label='Arquivo', menu=new_item)
 
@@ -211,9 +229,9 @@ lblBPM.grid(column=0, row=2)
 lblVel = Label(window, text="Vel:")
 lblVel.grid(column=0, row=3)
 
-txtPontoA = Entry(window,width=10)
+txtPontoA = Entry(window,width=10,text="0")
 txtPontoA.grid(column=1,row=0)
-txtPontoB = Entry(window,width=10)
+txtPontoB = Entry(window,width=10,text="85")
 txtPontoB.grid(column=1,row=1)
 txtBPM = Entry(window,width=10)
 txtBPM.grid(column=1,row=2)
@@ -229,16 +247,16 @@ lblB.grid(column=2, row=2)
  
 txtR = Entry(window,width=10)
 txtR.grid(column=3, row=0)
-txtB = Entry(window,width=10)
-txtB.grid(column=3, row=1)
 txtG = Entry(window,width=10)
-txtG.grid(column=3, row=2)
+txtG.grid(column=3, row=1)
+txtB = Entry(window,width=10)
+txtB.grid(column=3, row=2)
 
 lblEffects = Label(window, text="Efeitos:")
 lblEffects.grid(column=0,row=4,pady=10)
 
 cmbEffects = ttk.Combobox(window,width=20,state="readonly")
-cmbEffects['values']= ("Ligar","Grave", "Braco", "Corte", 4, 5, "Text")
+cmbEffects['values']= ("0 - Ligar","1 - Grave", "2 - Braco", "3 - Corte")
 cmbEffects.current(0) #set the selected item
 cmbEffects.grid(column=1, row=4,columnspan=3)
 
@@ -254,9 +272,41 @@ btnDeleteLst.grid(column=1, row=6)
 btnUpdateLst = Button(window, text="Trocar",command=updateList)
 btnUpdateLst.grid(column=2,row=6)
 
+'''
 lstEffects = Listbox(window,width=40)
 lstEffects.grid(column=0,row=7,columnspan=4)
- 
+'''
+
+tv = ttk.Treeview(window, columns=('R', 'G', 'B', 'Ponto A', 'Ponto B','Efeito','Velocidade','BPM'))
+tv.heading('#1', text='R')
+tv.heading('#2', text='G')
+tv.heading('#3', text='B')
+tv.heading('#4', text='Ponto A')
+tv.heading('#5', text='Ponto B')
+tv.heading('#6', text='Efeito')
+tv.heading('#7', text='Velocidade')
+tv.heading('#8', text='BPM')
+
+tv.column('#0',width=0)
+tv.column('#1',width=35)
+tv.column('#2',width=35)
+tv.column('#3',width=35)
+tv.column('#4',width=60)
+tv.column('#5',width=60)
+tv.column('#6',width=60)
+tv.column('#7',width=80)
+tv.column('#8',width=55)
+
+tv.column('#0', stretch=Tkinter.YES)
+tv.column('#1', stretch=Tkinter.YES)
+tv.column('#2', stretch=Tkinter.YES)
+
+tv.grid(row=8, columnspan=6, sticky='nsew')
+
+window.title("Sway LED")
+window.geometry('420x400')
+window.bind_all("<F9>",restart_program)
+
 strip.begin()
 window.config(menu=menu)
 window.mainloop()

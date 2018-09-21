@@ -2,6 +2,7 @@
 from Tkinter import *
 from functools import partial
 from itertools import product
+import os
 #from tkinter.font import Font
 # NeoPixel library strandtest example
 # Author: Tony DiCola (tony@tonydicola.com)
@@ -51,11 +52,12 @@ strip.begin()
 def key(event):        
     print (repr(event.char))
     evento = repr(event.char)
+    '''
     if (evento == "'1'"):
         ef1 = threading.Thread(target=laser)
         ef1.start()
     if (evento == "'2'"):
-        ef2 = threading.Thread(target=hihat)
+        ef2 = threading.Thread(target=hihat,args=(0.05,))
         ef2.start()
     if (evento == "'3'"):
         ef3 = threading.Thread(target=bpmtest)
@@ -81,12 +83,144 @@ def key(event):
     if (evento == "'0'"):
         ef10 = threading.Thread(target=bracoDown)
         ef10.start()
+        '''
+    if (evento == "'0'"):
+        ef1 = threading.Thread(target=off,args=(0,))
+        ef1.start()
+
+    if (evento == "'1'"):
+        ef1 = threading.Thread(target=bassGFY,args=(1,))
+        ef1.start()
+    if (evento == "'4'"):
+        ef1 = threading.Thread(target=bassGFY,args=(2,))
+        ef1.start()
+    if (evento == "'7'"):
+        ef1 = threading.Thread(target=bassGFY,args=(3,))
+        ef1.start()
+
+    if (evento == "'2'"):
+        ef1 = threading.Thread(target=guitarGFY,args=(1,))
+        ef1.start()
+    if (evento == "'5'"):
+        ef1 = threading.Thread(target=guitarGFY,args=(2,))
+        ef1.start()
+    if (evento == "'8'"):
+        ef1 = threading.Thread(target=guitarGFY,args=(3,))
+        ef1.start()
 
 def off(event):
     for i in range(LED_COUNT):
         strip. setPixelColor(i, Color(0,0,0))
     strip.show()
     print("desliguei")
+
+
+def guitarGFY(cor):
+    if cor == 1:
+        for i in range(100,-5,-5):
+            strip.setPixelColor(92, Color(i,0,i))
+            strip.setPixelColor(93, Color(i,0,i))
+            strip.setPixelColor(94, Color(i,0,i))
+            strip.show()
+            time.sleep(.005)
+    if cor == 2:
+        for i in range(100,-5,-5):
+            strip.setPixelColor(106, Color(i,0,i))
+            strip.setPixelColor(107, Color(i,0,i))
+            strip.setPixelColor(108, Color(i,0,i))
+            strip.show()
+            time.sleep(.005)
+    if cor == 3:
+        for i in range(100,-5,-5):
+            strip.setPixelColor(118, Color(i,0,i))
+            strip.setPixelColor(117, Color(i,0,i))
+            strip.setPixelColor(116, Color(i,0,i))
+            strip.show()
+            time.sleep(.005)
+
+
+
+def bassGFY(cor):
+    for i in range(4):
+        #strip.setBrightness(100)
+
+        def up():
+            for i in range(1,7):
+                for j in range(13*(i-1), 13*i):
+                    if cor == 1: strip.setPixelColor(j, Color(0,100,0))
+                    if cor == 2: strip.setPixelColor(j, Color(0,100,0))
+                    if cor == 3: strip.setPixelColor(j, Color(100,100,0))
+                    if cor == 4: strip.setPixelColor(j, Color(100,0,0))
+                strip.show()
+                time.sleep(.01)
+
+        def treble():
+            for i in range(7,8):
+                for j in range(13*(i-1), 13*i):
+                    if cor == 1: strip.setPixelColor(j, Color(0,100,0))
+                    if cor == 2: strip.setPixelColor(j, Color(0,100,0))
+                    if cor == 3: strip.setPixelColor(j, Color(100,100,0))
+                    if cor == 4: strip.setPixelColor(j, Color(100,0,0))
+                strip.show()
+                time.sleep(.01)
+
+            brT = threading.Thread(target=brilho)
+            brT.start()
+
+            for i in range(8,6,-1):
+                for j in range(13*(i-1), 13*i):
+                    strip.setPixelColor(j, Color(0,0,0))
+                strip.show()
+                time.sleep(.01)
+
+        def down():
+            for i in range(6,0,-1):
+                for j in range(13*(i-1), 13*i):
+                    strip.setPixelColor(j, Color(0,0,0))
+                strip.show()
+            time.sleep(.01)
+
+        def brilho():
+            for i in range(1):
+                for j in range(105,255,31):
+                    strip.setBrightness(j)
+                    strip.show()
+                    time.sleep(.01)
+                for j in range(255,105,-31):
+                    strip.setBrightness(j)
+                    strip.show()
+                    time.sleep(.01)
+            for j in range(105,255,31):
+                    strip.setBrightness(j)
+                    strip.show()
+                    time.sleep(.01)
+
+
+
+        up()
+        time.sleep(.05)
+        treble()
+        time.sleep(.05)
+        treble()
+        time.sleep(.05)
+        treble()
+        time.sleep(.05)
+        treble()
+        time.sleep(.05)
+        treble()
+        time.sleep(.05)
+        treble()
+        time.sleep(.05)
+        treble()
+        time.sleep(.05)
+        down()
+
+        cor = cor+1
+        time.sleep(.7)
+
+
+
+
 
 def luz(R, G, B, pontoA, pontoB):
     for i in range(pontoA, pontoB):
@@ -241,10 +375,20 @@ def hihat(vel):
         strip.show()
         time.sleep(vel)
 
+def restart_program(event):
+    """Restarts the current program.
+    Note: this function does not return. Any cleanup action (like
+    saving data) must be done before calling this function."""
+    python = sys.executable
+    os.execl(python, python, * sys.argv)
+
+
 win.title("Projeto LED em GUI")
 win.geometry('300x300')
 win.bind("<KeyPress>", key)
 #win.bind("<KeyRelease>", off)
+win.bind_all("<F9>",restart_program)
+
 
 
 strip.begin()
