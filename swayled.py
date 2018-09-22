@@ -9,7 +9,7 @@ import argparse
 import threading
 import tkMessageBox
 
-from recipe import *
+#from recipe import *
 from Tkinter import *
 from decimal import *
 from neopixel import *
