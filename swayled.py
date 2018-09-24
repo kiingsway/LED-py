@@ -10,6 +10,7 @@ import threading
 import tkMessageBox
 
 #from recipe import *
+from effects import *
 from Tkinter import *
 from decimal import *
 from neopixel import *
@@ -70,13 +71,13 @@ def testLED():
 		testThread = threading.Thread(target=acenderLEDEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,))
 		testThread.start()
 	if cmbEffects.current() == 1:
-		testThread = threading.Thread(target=graveLEDEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
+		testThread = threading.Thread(target=simpleBassEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
 		testThread.start()
 	if cmbEffects.current() == 2:
-		testThread = threading.Thread(target=bracoLEDEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
+		testThread = threading.Thread(target=bassBracoEffectBETA,args=(pontoB/10,redLed,greenLed,blueLed,vel,))
 		testThread.start()
 	if cmbEffects.current() == 3:
-		testThread = threading.Thread(target=corteLEDEffect,args=(redLed,greenLed,blueLed,vel,))
+		testThread = threading.Thread(target=corteCobraEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
 		testThread.start()
 
 
@@ -147,19 +148,9 @@ def off():
 		strip.setPixelColor(i, Color(0,0,0))
 	strip.show()
 
-def acenderLEDEffect(pontoA,pontoB,R,G,B):
-	for i in range(pontoA,pontoB+1):
-		strip.setPixelColor(i,Color(B,R,G))
-	strip.show()
 
-def graveLEDEffect(pontoA,pontoB,R,G,B,vel):
-	acenderLEDEffect(pontoA,pontoB,R,G,B)
-	for brightness in range(255,-1,-15):
-		strip.setBrightness(brightness)
-		strip.show()
-		time.sleep(vel)
-	off()
-	strip.setBrightness(LED_BRIGHTNESS)
+
+
 
 def bracoLEDEffect(pontoA,pontoB,R,G,B,vel):
     for i in range(pontoA,pontoB,13):
@@ -200,7 +191,7 @@ def corteLEDEffect(R,G,B,vel):
 def on_select():
 	print("Itens:", len(tv.get_children("")))
 
-def restart_program(event):
+def restart_program(event=0):
     """Restarts the current program.
     Note: this function does not return. Any cleanup action (like
     saving data) must be done before calling this function."""
@@ -256,7 +247,7 @@ lblEffects = Label(window, text="Efeitos:")
 lblEffects.grid(column=0,row=4,pady=10)
 
 cmbEffects = ttk.Combobox(window,width=20,state="readonly")
-cmbEffects['values']= ("0 - Ligar","1 - Grave", "2 - Braco", "3 - Corte")
+cmbEffects['values']= ("0 - Ligar","1 - Grave", "2 - Braco", "3 - Corte Cobra")
 cmbEffects.current(0) #set the selected item
 cmbEffects.grid(column=1, row=4,columnspan=3)
 
