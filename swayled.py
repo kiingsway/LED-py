@@ -12,11 +12,13 @@ import tkMessageBox
 #from recipe import *
 from effects import *
 from effectsBeta import *
+from led5050 import *
 from Tkinter import *
 from decimal import *
 from neopixel import *
 from itertools import product
 from functools import partial
+from tkColorChooser import askcolor
 
 # LED strip configuration:
 LED_COUNT      = 120      # Number of LED pixels.
@@ -160,7 +162,18 @@ def playLED():
 			playThread.start()
 		time.sleep(bpm)
 		'''
-		
+def pegarCor():
+    color = askcolor()
+    txtR.delete(0,END)
+    txtR.insert(0,color[0][0])	
+    txtG.delete(0,END)
+    txtG.insert(0,color[0][1])	
+    txtB.delete(0,END)
+    txtB.insert(0,color[0][2])
+
+def pegarCorLed5050():
+	color = askcolor()
+	fitaLed(color[0][0],color[0][1],color[0][2])
 
 def off():
 	for i in range(LED_COUNT):
@@ -244,6 +257,11 @@ new_item.add_separator()
 new_item.add_command(label='Resetar App',command=restart_program,accelerator="F9")
 new_item.add_command(label='Sobre')
 menu.add_cascade(label='Arquivo', menu=new_item)
+
+sel_menu = Menu(menu)
+sel_menu.add_command(label='Pegar RGB',command=pegarCor)
+sel_menu.add_command(label='Pegar RGB 5050',command=pegarCorLed5050)
+menu.add_cascade(label='Selecionar', menu=sel_menu)
 
 
 lblPontoA = Label(window, text="Ponto A:")
