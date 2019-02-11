@@ -2,6 +2,7 @@ import time
 import threading
 from decimal import *
 from neopixel import *
+from random import randint
 
 BPM = 128
 bpm4 = Decimal(60)/Decimal(BPM)
@@ -69,3 +70,40 @@ def teatroEffect(pontoA,pontoB, R,G,B, vel, duracao):
         strip.show()
         time.sleep(vel)
     off()
+
+
+def posAleatoriaFade(pontoA,pontoB, R,G,B, vel):
+    # Criado para dar efeito a musica "Swagga", Point.Blank
+    # Liga posicoes aleatorias com a cor selecionada
+    for pos in range(pontoA,pontoB):
+        if (randint(0,1)) == 1: strip.setPixelColor(pos,Color(G,R,B))
+
+    for brilho in range(0,100,5):
+        strip.setBrightness(brilho)
+        strip.show()
+        time.sleep(vel)
+
+    for brilho in range(100,0,-5):
+        strip.setBrightness(brilho)
+        strip.show()
+        time.sleep(vel)
+    off()
+    strip.setBrightness(LED_BRIGHTNESS)
+
+def bracoLivre(pontoA,pontoB, R,G,B, vel):
+    # Antigo pistol para a musica "Swagga", Point.Blank
+    # Pinta as cada cor e aparece quando for divisivel por 10
+    # Pinta de 1 a 10. Depois mostra. Apaga os 20 ultimos
+    for pos in range(pontoB,pontoA,-1):
+        strip.setPixelColor(pos-20,Color(G,R,B))
+        strip.setPixelColor(pos,Color(0,0,0))
+        if (pos % 10 == 0):
+            strip.show()
+            time.sleep(vel)
+
+    for pos in range(pontoB):
+        strip.setPixelColor(pos,Color(G,R,B))
+        strip.setPixelColor(pos-20,Color(0,0,0))
+        if (pos % 10 == 0):
+            strip.show()
+            time.sleep(vel)

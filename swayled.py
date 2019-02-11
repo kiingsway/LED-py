@@ -92,6 +92,12 @@ def testLED():
 	if cmbEffects.current() == 6:
 		testThread = threading.Thread(target=teatroEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1))
 		testThread.start()
+	if cmbEffects.current() == 7:
+		testThread = threading.Thread(target=posAleatoriaFade,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
+		testThread.start()
+	if cmbEffects.current() == 8:
+		testThread = threading.Thread(target=bracoLivre,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
+		testThread.start()
 
 
 def insertEffect(upd):
@@ -282,7 +288,15 @@ lblEffects = Label(window, text="Efeitos:")
 lblEffects.grid(column=0,row=4,pady=10)
 
 cmbEffects = ttk.Combobox(window,width=20,state="readonly")
-cmbEffects['values']= ("0 - Ligar","1 - Grave", "2 - Braco", "3 - Corte Cobra", "4 - Laser Esq", "5 - Corte", "6 - Teatro", "7 - Teste")
+cmbEffects['values']= ("0 - Ligar",
+	"1 - Grave",
+	"2 - Braco",
+	"3 - Corte Cobra",
+	"4 - Laser Esq",
+	"5 - Corte",
+	"6 - Teatro",
+	"7 - Aleatorio fade",
+	"8 - Teste")
 cmbEffects.current(0) #set the selected item
 cmbEffects.grid(column=1, row=4,columnspan=3)
 cmbEffects.bind("<<ComboboxSelected>>", mostrarTxtFuncao)
