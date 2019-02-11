@@ -11,6 +11,7 @@ import tkMessageBox
 
 #from recipe import *
 from effects import *
+from effectsBeta import *
 from Tkinter import *
 from decimal import *
 from neopixel import *
@@ -35,7 +36,7 @@ args = parser.parse_args()
 
 # Create NeoPixel object with appropriate configuration.
 strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
-    # Intialize the library (must be called once before other functions).
+# Intialize the library (must be called once before other functions).
 strip.begin()
 
 pontoA=pontoB=redLed=greenLed=blueLed=vel = 0
@@ -67,6 +68,9 @@ def testLED():
 	else: bpm = int(txtBPM.get())
 	bpm = Decimal(60)/Decimal(bpm)
 
+	if txtFuncao1.get() == '': funcao1 = 3
+	else: funcao1 = int(txtFuncao1.get())
+
 	if cmbEffects.current() == 0:
 		testThread = threading.Thread(target=acenderLEDEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,))
 		testThread.start()
@@ -77,7 +81,16 @@ def testLED():
 		testThread = threading.Thread(target=bassBracoEffectBETA,args=(pontoB/10,redLed,greenLed,blueLed,vel,))
 		testThread.start()
 	if cmbEffects.current() == 3:
-		testThread = threading.Thread(target=corteCobraEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
+		testThread = threading.Thread(target=corteCobraEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1,))
+		testThread.start()
+	if cmbEffects.current() == 4:
+		testThread = threading.Thread(target=laserLeftEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1,))
+		testThread.start()
+	if cmbEffects.current() == 5:
+		testThread = threading.Thread(target=corteEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
+		testThread.start()
+	if cmbEffects.current() == 6:
+		testThread = threading.Thread(target=teatroEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1))
 		testThread.start()
 
 
@@ -148,10 +161,6 @@ def off():
 		strip.setPixelColor(i, Color(0,0,0))
 	strip.show()
 
-
-
-
-
 def bracoLEDEffect(pontoA,pontoB,R,G,B,vel):
     for i in range(pontoA,pontoB,13):
         for j in range(i, i+13):
@@ -190,6 +199,26 @@ def corteLEDEffect(R,G,B,vel):
 
 def on_select():
 	print("Itens:", len(tv.get_children("")))
+
+def mostrarTxtFuncao(x):
+	if cmbEffects.current() == 3:
+		lblFuncao1.config(text = "Tamanho:")
+		lblFuncao1.grid()
+		txtFuncao1.grid()
+
+	elif cmbEffects.current() == 4:
+		lblFuncao1.config(text = "Duracao:")
+		lblFuncao1.grid()
+		txtFuncao1.grid()
+
+	elif cmbEffects.current() == 6:
+		lblFuncao1.config(text = "Duracao:")
+		lblFuncao1.grid()
+		txtFuncao1.grid()
+
+	else:
+		lblFuncao1.grid_remove()
+		txtFuncao1.grid_remove()
 
 def restart_program(event=0):
     """Restarts the current program.
@@ -235,6 +264,9 @@ lblG = Label(window, text="G:")
 lblG.grid(column=2, row=1)
 lblB = Label(window, text="B:")
 lblB.grid(column=2, row=2)
+lblFuncao1 = Label(window, text="...:")
+lblFuncao1.grid(column=2, row=3)
+lblFuncao1.grid_remove()
  
 txtR = Entry(window,width=10)
 txtR.grid(column=3, row=0)
@@ -242,14 +274,18 @@ txtG = Entry(window,width=10)
 txtG.grid(column=3, row=1)
 txtB = Entry(window,width=10)
 txtB.grid(column=3, row=2)
+txtFuncao1 = Entry(window,width=10)
+txtFuncao1.grid(column=3, row=3)
+txtFuncao1.grid_remove()
 
 lblEffects = Label(window, text="Efeitos:")
 lblEffects.grid(column=0,row=4,pady=10)
 
 cmbEffects = ttk.Combobox(window,width=20,state="readonly")
-cmbEffects['values']= ("0 - Ligar","1 - Grave", "2 - Braco", "3 - Corte Cobra")
+cmbEffects['values']= ("0 - Ligar","1 - Grave", "2 - Braco", "3 - Corte Cobra", "4 - Laser Esq", "5 - Corte", "6 - Teatro", "7 - Teste")
 cmbEffects.current(0) #set the selected item
 cmbEffects.grid(column=1, row=4,columnspan=3)
+cmbEffects.bind("<<ComboboxSelected>>", mostrarTxtFuncao)
 
 btnTest = Button(window, text="Testar", command=testLED)
 btnTest.grid(column=0, row=5)
