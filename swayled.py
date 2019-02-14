@@ -12,6 +12,7 @@ import tkMessageBox
 #from recipe import *
 from effects import *
 from effectsBeta import *
+from efeitosTeclado import *
 from led5050 import *
 from Tkinter import *
 from decimal import *
@@ -42,6 +43,7 @@ strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, 
 strip.begin()
 
 pontoA=pontoB=redLed=greenLed=blueLed=vel = 0
+atalho = 0
 
 
 window = Tk()
@@ -52,7 +54,7 @@ def validateFields():
 		return False
 	return True
 
-def testLED():
+def testLED(event=0):
 	if not validateFields(): return
 
 	pontoA = int(txtPontoA.get())
@@ -98,7 +100,7 @@ def testLED():
 		testThread = threading.Thread(target=posAleatoriaFade,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
 		testThread.start()
 	if cmbEffects.current() == 8:
-		testThread = threading.Thread(target=bracoLivre,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
+		testThread = threading.Thread(target=megaman,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
 		testThread.start()
 
 
@@ -239,6 +241,191 @@ def mostrarTxtFuncao(x):
 		lblFuncao1.grid_remove()
 		txtFuncao1.grid_remove()
 
+def apagarTxts():
+	txtR.delete(0,END)
+	txtG.delete(0,END)
+	txtB.delete(0,END)
+	txtPontoA.delete(0,END)
+	txtPontoB.delete(0,END)
+	txtVel.delete(0,END)
+	txtFuncao1.delete(0,END)
+
+def atualizarCampos(pontoA,pontoB, R,G,B, vel, efeito, funcao1):
+	txtR.insert(0,R)
+	txtR.insert(0,G)
+	txtB.insert(0,B)
+	txtPontoA.insert(0,pontoA)
+	txtPontoB.insert(0,pontoB)
+	txtVel.insert(0,vel)
+	txtFuncao1.insert(0,funcao1)
+	cmbEffects.current(efeito)
+
+
+def atalhoF(event=0):
+	global atalho
+	if atalho == 0:
+		apagarTxts()
+		atualizarCampos("80","95","50","0","5",".02",1,"0")
+		testLED()
+	elif atalho == 1:
+		apagarTxts()
+		atualizarCampos("80","95","50","50","0",".01",1,"0")
+		testLED()
+	elif atalho == 2:
+		apagarTxts()
+		atualizarCampos("20","100","50","0","50",".01",4,"2")
+		testLED()
+	elif atalho == 3:
+		apagarTxts()
+		atualizarCampos("20","80","24","0","100",".06",6,"2")
+		testLED()
+	else:
+		apagarTxts()
+		cmbEffects.current(1)
+		txtR.insert(0,"100")
+		txtG.insert(0,"100")
+		txtB.insert(0,"100")
+		txtPontoA.insert(0,"79")
+		txtPontoB.insert(0,"119")
+		txtVel.insert(0,".028")
+		txtFuncao1.insert(0,"2")
+		testLED()
+
+
+def atalhoG(event=0):
+	global atalho
+	if atalho == 0:
+		cmbEffects.current(1)
+		apagarTxts()
+		txtR.insert(0,"50")
+		txtB.insert(0,"5")
+		txtPontoA.insert(0,"50")
+		txtPontoB.insert(0,"65")
+		txtVel.insert(0,".02")
+		testLED()
+	elif atalho == 1:
+		apagarTxts()
+		txtR.insert(0,"50")
+		txtG.insert(0,"50")
+		txtPontoA.insert(0,"50")
+		txtPontoB.insert(0,"65")
+		txtVel.insert(0,".01")
+		testLED()
+	elif atalho == 4:
+		apagarTxts()
+		cmbEffects.current(1)
+		txtR.insert(0,"100")
+		txtG.insert(0,"100")
+		txtB.insert(0,"100")
+		txtPontoA.insert(0,"39")
+		txtPontoB.insert(0,"79")
+		txtVel.insert(0,".026")
+		txtFuncao1.insert(0,"2")
+		testLED()
+
+def atalhoH(event=0):
+	global atalho
+	if atalho == 0:
+		cmbEffects.current(1)
+		apagarTxts()
+		txtR.insert(0,"50")
+		txtB.insert(0,"5")
+		txtPontoA.insert(0,"10")
+		txtPontoB.insert(0,"25")
+		txtVel.insert(0,".02")
+		testLED()
+	elif atalho == 1:
+		apagarTxts()
+		txtR.insert(0,"50")
+		txtG.insert(0,"50")
+		txtPontoA.insert(0,"10")
+		txtPontoB.insert(0,"25")
+		txtVel.insert(0,".01")
+		testLED()
+		print("F, com 1")
+	elif atalho == 4:
+		apagarTxts()
+		cmbEffects.current(1)
+		txtR.insert(0,"100")
+		txtG.insert(0,"100")
+		txtB.insert(0,"100")
+		txtPontoA.insert(0,"0")
+		txtPontoB.insert(0,"39")
+		txtVel.insert(0,".019")
+		txtFuncao1.insert(0,"2")
+		testLED()
+
+
+
+def atalhos(event=0):
+	global atalho
+	if atalho == 0:
+		cmbEffects.current(1)
+		txtR.delete(0,END)
+		txtR.insert(0,"100")
+		txtG.delete(0,END)
+		txtB.delete(0,END)
+		txtPontoA.delete(0,END)
+		txtPontoA.insert(0,"40")
+		txtPontoB.delete(0,END)
+		txtPontoB.insert(0,"80")
+		txtVel.delete(0,END)
+		txtVel.insert(0,".020")
+		atalho += 1
+		print ("Atalho = 1")
+	elif atalho == 1:
+		txtG.delete(0,END)
+		txtG.insert(0,"100")
+		txtVel.delete(0,END)
+		txtVel.insert(0,".01")
+		atalho += 1 
+		print ("Atalho = 2")
+	elif atalho == 2:
+		cmbEffects.current(4)
+		txtR.delete(0,END)
+		txtR.insert(0,"100")
+		txtG.delete(0,END)
+		txtB.delete(0,END)
+		txtB.insert(0,"100")
+		txtVel.delete(0,END)
+		txtVel.insert(0,".01")
+		txtFuncao1.delete(0,END)
+		txtFuncao1.insert(0,"2")
+		atalho += 1 
+		print ("Atalho = 3")
+	elif atalho == 3:
+		cmbEffects.current(6)
+		txtPontoA.delete(0,END)
+		txtPontoA.insert(0,"20")
+		txtPontoB.delete(0,END)
+		txtPontoB.insert(0,"80")
+		txtR.delete(0,END)
+		txtR.insert(0,"24")
+		txtB.insert(0,"100")
+		txtVel.delete(0,END)
+		txtVel.insert(0,".06")
+		txtFuncao1.delete(0,END)
+		txtFuncao1.insert(0,"2")		
+		atalho += 1
+		print ("Atalho = 4")
+	else:
+		cmbEffects.current(1)
+		txtR.delete(0,END)
+		txtR.insert(0,"100")
+		txtG.delete(0,END)
+		txtG.insert(0,"100")
+		txtB.delete(0,END)
+		txtB.insert(0,"100")
+		txtPontoA.delete(0,END)
+		txtPontoA.insert(0,"0")
+		txtPontoB.delete(0,END)
+		txtPontoB.insert(0,"120")
+		txtVel.delete(0,END)
+		txtVel.insert(0,".022")
+		atalho = 0
+		print ("Atalho = 0")
+
+
 def restart_program(event=0):
     """Restarts the current program.
     Note: this function does not return. Any cleanup action (like
@@ -365,6 +552,11 @@ tv.grid(row=8, columnspan=6, sticky='nsew')
 window.title("Sway LED")
 window.geometry('420x400')
 window.bind_all("<F9>",restart_program)
+window.bind_all("<F3>",atalhos)
+window.bind_all("<Return>",testLED)
+window.bind_all("f",atalhoF)
+window.bind_all("g",atalhoG)
+window.bind_all("h",atalhoH)
 
 strip.begin()
 window.config(menu=menu)

@@ -34,7 +34,7 @@ def simpleBassEffectBETA(pontoA,pontoB, R,G,B, vel):
     # Assim todos os LEDs sao desligados de forma equalitaria
 
     # BETA: quanto mais LEDs mais demora (perceptivel no LED ~30)
-    for i in range(100,-10,-10):
+    for i in range(100,-10,-20):
         for j in range(pontoA,pontoB):
             x = Decimal(G)/Decimal(100)*i
             y = Decimal(R)/Decimal(100)*i
@@ -322,5 +322,24 @@ def tresPontosInvert():
             strip.setPixelColor(86+i, Color(0,0,0))
 	strip.show()
 	time.sleep(.05)
+
+def megaman(pontoA,pontoB,R,G,B,vel):
+    def intro():
+        for pos in range(120,0,-1):
+            strip.setPixelColor(pos,Color(18,0,25))
+            strip.show()
+    def carrega():
+        for pos in range(50,70):
+            strip.setPixelColor(pos+20,Color(187/4,0,215/4))
+            strip.setPixelColor(pos,Color(200,0,255))
+            strip.setPixelColor(pos-20,Color(187/4,0,215/4))
+        strip.show()
+        time.sleep(2)
+
+
+
+    #intro()
+    carrega()
+    off()
 
 strip.begin()

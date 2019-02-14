@@ -33,7 +33,7 @@ def off(event=0):
 def acenderLEDEffect(pontoA,pontoB,R,G,B):
     # De um ponto escolhido, liga os LEDs solicitados
     off()
-    for i in range(pontoA,pontoB+1):
+    for i in range(pontoA,pontoB):
         strip.setPixelColor(i,Color(G,R,B))
     strip.show()
 

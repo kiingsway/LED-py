@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 from time import sleep
+#GPIO.setWarnings(False)
 
 ledRPin = 23
 ledGPin = 24
