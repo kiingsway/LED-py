@@ -12,7 +12,6 @@ import tkMessageBox
 #from recipe import *
 from effects import *
 from effectsBeta import *
-from efeitosTeclado import *
 from led5050 import *
 from Tkinter import *
 from decimal import *

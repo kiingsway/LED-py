@@ -325,21 +325,31 @@ def tresPontosInvert():
 
 def megaman(pontoA,pontoB,R,G,B,vel):
     def intro():
-        for pos in range(120,0,-1):
+        for pos in range(LED_COUNT,0,-1):
             strip.setPixelColor(pos,Color(18,0,25))
-            strip.show()
+            if pos % 10 == 0:
+                strip.show()
+                time.sleep(vel)
     def carrega():
-        for pos in range(50,70):
-            strip.setPixelColor(pos+20,Color(187/4,0,215/4))
-            strip.setPixelColor(pos,Color(200,0,255))
-            strip.setPixelColor(pos-20,Color(187/4,0,215/4))
-        strip.show()
-        time.sleep(2)
+        for posBase in range(0,LED_COUNT,5):
+            for pos in range(posBase,posBase+20):
+                strip.setPixelColor(pos+20,Color(187/4,0,215/4))
+                strip.setPixelColor(pos,Color(200,0,255))
+                strip.setPixelColor(pos-20,Color(187/4,0,215/4))
+            strip.show()
+            time.sleep(vel/2)
+    def fim():
+        for pos in range(0,LED_COUNT):
+            strip.setPixelColor(pos,Color(0,0,0))
+            if pos % 10 == 0:
+                strip.show()
+                time.sleep(vel/4)
 
 
 
-    #intro()
+    intro()
     carrega()
+    fim()
     off()
 
 strip.begin()
