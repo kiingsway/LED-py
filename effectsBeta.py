@@ -132,7 +132,7 @@ def corteEffectBETA(pontoA,pontoB, R,G,B, vel):
     # Sobe e desce uma linha
 
     # BETA: Ponto A e Ponto B nao definidos
-    for i in range(5):
+    for i in range(3):
         if i < 4:
             for j in range(60+12*i,60+12*(1+i)):
                 strip.setPixelColor(j,Color(G,R,B))
@@ -152,14 +152,15 @@ def corteEffectBETA(pontoA,pontoB, R,G,B, vel):
 
 def bassBracoInvertEffect2(pontoA,pontoB, R,G,B, vel):
     # Liga a ultima linha de LED e vai descendo ou subindo
-    for i in range(6):
+    for i in range(4):
         if i < 4:
-            for j in range(60+12*i,60+12*(1+i)):
-                strip.setPixelColor(j,Color(100,100,0))
-            for y in range(60-(12*i),60-(12*(1+i)),-1):
-                strip.setPixelColor(y,Color(100,100,0))
+            for j in range(60+6*i,60+6*(1+i)):
+                strip.setPixelColor(j,Color(G,R,B))
+            for y in range(60-(6*i),60-(6*(1+i)),-1):
+                strip.setPixelColor(y,Color(G,R,B))
         strip.show()
         time.sleep(vel)
+    #off()
 
 
 def bassBracoEffect(altura, R,G,B, vel):
@@ -337,7 +338,8 @@ def megaman(pontoA,pontoB,R,G,B,vel):
                 strip.setPixelColor(pos,Color(200,0,255))
                 strip.setPixelColor(pos-20,Color(187/4,0,215/4))
             strip.show()
-            time.sleep(vel/2)
+            if posBase <= LED_COUNT/4: time.sleep(vel*3)
+            if posBase > LED_COUNT/4: time.sleep(vel/8)
     def fim():
         for pos in range(0,LED_COUNT):
             strip.setPixelColor(pos,Color(0,0,0))

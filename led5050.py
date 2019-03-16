@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 from time import sleep
 #GPIO.setWarnings(False)
+GPIO.cleanup()
 
 ledRPin = 23
 ledGPin = 24
@@ -21,3 +22,4 @@ def fitaLed(r,g,b):
 	ledRD2A.ChangeDutyCycle(r)
 	ledGD2A.ChangeDutyCycle(g)
 	ledBD2A.ChangeDutyCycle(b)
+

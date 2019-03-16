@@ -32,6 +32,8 @@ def off(event=0):
 # Efeitos PRONTOS
 def acenderLEDEffect(pontoA,pontoB,R,G,B):
     # De um ponto escolhido, liga os LEDs solicitados
+    #swayled.offInNew
+    #if swayled.offInNew == 1:
     off()
     for i in range(pontoA,pontoB):
         strip.setPixelColor(i,Color(G,R,B))
@@ -51,6 +53,7 @@ def simpleBassEffect(pontoA,pontoB,R,G,B,vel):
         time.sleep(vel)
     off()
     strip.setBrightness(LED_BRIGHTNESS)
+
 
 def teatroEffect(pontoA,pontoB, R,G,B, vel, duracao):
     # O tempo de duracao eh o tempo atual somada a duracao escolhida.
@@ -107,3 +110,24 @@ def bracoLivre(pontoA,pontoB, R,G,B, vel):
         if (pos % 10 == 0):
             strip.show()
             time.sleep(vel)
+
+
+def wheel(pos):
+    """Generate rainbow colors across 0-255 positions."""
+    if pos < 85:
+        return Color(pos * 3, 255 - pos * 3, 0)
+    elif pos < 170:
+        pos -= 85
+        return Color(255 - pos * 3, 0, pos * 3)
+    else:
+        pos -= 170
+        return Color(0, pos * 3, 255 - pos * 3)
+
+    
+def rainbowCycle(strip, wait_ms=20, iterations=5):
+    """Draw rainbow that uniformly distributes itself across all pixels."""
+    for j in range(256*iterations):
+        for i in range(strip.numPixels()):
+            strip.setPixelColor(i, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
+        strip.show()
+        time.sleep(wait_ms/1000.0)
