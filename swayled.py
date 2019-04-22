@@ -122,7 +122,51 @@ def testLED(event=0):
 		testThread = threading.Thread(target=megaman,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
 		testThread.start()
 
+def autoscroll(sbar, first, last):
+    """Hide and show scrollbar as needed."""
+    first, last = float(first), float(last)
+    if first <= 0 and last >= 1:
+        sbar.grid_remove()
+    else:
+        sbar.grid()
+    sbar.set(first, last)
 
+def janelaErros():
+
+    #janelaParaErros = Toplevel(window)
+    janelaParaErros = Toplevel(window)
+    janelaParaErros.title("Erros Sway LED")
+    
+    #   Barras horizontais
+    vsb = ttk.Scrollbar(orient="vertical")
+    hsb = ttk.Scrollbar(orient="horizontal")
+
+    #   Objeto Treeview
+    tree = ttk.Treeview(janelaParaErros, columns=("codigoProblematico","erroPython"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
+    xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
+
+    #   Barras de scroll às vistas x e y do objeto Treeview
+    vsb['command'] = tree.yview
+    hsb['command'] = tree.xview
+
+    #   Cabeçalhos das diferentes colunas
+    tree.heading("#0", text="Erro", anchor='w')
+    tree.heading("codigoProblematico", text="Parte do código", anchor='w')
+    tree.heading("erroPython", text="Erro Python", anchor='w')
+    tree.column("#0", stretch=0, width=500)
+    tree.column("codigoProblematico", stretch=0, width=200)
+    tree.column("erroPython", stretch=0, width=200)
+
+    #   Inserção na treeview
+    for i in range(len(erros)):
+    	tree.insert('', 'end', text=erros[i]["tituloErro"], values=[erros[i]["codigoProblematico"], erros[i]["erroPython"]])
+
+    # Arrange the tree and its scrollbars in the toplevel
+    tree.grid(column=0, row=0, sticky='nswe')
+    vsb.grid(column=1, row=0, sticky='ns')
+    hsb.grid(column=0, row=1, sticky='ew')
+    janelaParaErros.grid_columnconfigure(0, weight=1)
+    janelaParaErros.grid_rowconfigure(0, weight=1)
 
 def pegarCor():
     color = askcolor()
@@ -136,17 +180,6 @@ def pegarCor():
 def pegarCorLed5050():
 	color = askcolor()
 	fitaLed(color[0][0],color[0][1],color[0][2])
-
-def deleteList():
-	lstEffects.delete(lstEffects.curselection())
-
-def updateList():
-	insertEffect(True)
-	if lstEffects.curselection(): lstEffects.delete(lstEffects.curselection())
-	else: tkMessageBox.showinfo("Entrada necessaria", "Preciso saber qual trocarei")	
-
-def on_select():
-	print("Itens:", len(tv.get_children("")))
 
 def mostrarTxtFuncao(x):
 	if cmbEffects.current() == 3:
@@ -373,10 +406,6 @@ def rainbowCycle(strip, wait_ms=20, iterations=5):
 
 menu = Menu(window)
 new_item = Menu(menu,tearoff=False)
-new_item.add_command(label='Abrir',command=on_select)
-new_item.add_command(label='Salvar')
-new_item.add_command(label='Salvar como...')
-new_item.add_separator()
 new_item.add_command(label='Desligar LEDs',command=desligar)
 new_item.add_separator()
 new_item.add_command(label='Resetar App',command=restart_program,accelerator="F9")
@@ -387,6 +416,8 @@ sel_menu = Menu(menu,tearoff=False)
 sel_menu.add_command(label='Pegar RGB',command=pegarCor)
 sel_menu.add_command(label='Pegar RGB 5050',command=pegarCorLed5050)
 menu.add_cascade(label='Selecionar', menu=sel_menu)
+
+if len(erros) > 0: menu.add_cascade(label='Erros', command=janelaErros)
 
 
 lblPontoA = Label(window, text="Ponto A:")
