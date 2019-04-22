@@ -1,46 +1,58 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os
 import sys
-import ttk
 import time
 import random
-import Tkinter
 import argparse
 import threading
-import tkMessageBox
 
-#from recipe import *
-from effects import *
-from effectsBeta import *
-#from led5050 import *
-from Tkinter import *
+erros = []
+
+def addErros(classe,codigo,erro):
+	erros.append(dict(tituloErro=classe,
+    codigoProblematico=codigo,
+    erroPython=erro))
+
+try: from Tkinter import *
+except ImportError: from tkinter import *
+except Exception: addErros((str(sys.exc_info()[0])+': Tkinter está instalado?'),'from Tkinter import *',sys.exc_info()[1])
+
+try: import ttk
+except ImportError: import tkinter.ttk as ttk
+except Exception: addErros((str(sys.exc_info()[0])+': ttk está instalado?'),'from Tkinter import *',sys.exc_info()[1])
+
+try: import tkMessageBox
+except ImportError: import tkinter.messagebox
+
+try: from tkColorChooser import askcolor
+except ImportError: from tkinter.colorchooser import askcolor
+
+try: from effects import *
+except ImportError: addErros('ImportError: O arquivo efeitos.py está na pasta do código?','from effects import *',sys.exc_info()[1])
+except NotImplementedError:	addErros('NotImplementedError: Erro na importação da biblioteca effects.py','from effects import *',sys.exc_info()[1])
+
+try: from effectsBeta import *
+except ImportError: addErros('ImportError: O arquivo efeitosBeta.py está na pasta do código?','from effectsBeta import *',sys.exc_info()[1])
+except NotImplementedError:	addErros('NotImplementedError: Erro no código da biblioteca effectsBeta.py','from effectsBeta import *',sys.exc_info()[1])
+
+try: from led5050 import *
+except NotImplementedError:	addErros('NotImplementedError: Erro no código da biblioteca led5050.py','try: from led5050 import *',sys.exc_info()[1])
+except ModuleNotFoundError: addErros('ModuleNotFoundError: Um módulo não foi executado','from led5050 import *',sys.exc_info()[1])
+except ImportError: addErros('ImportError: O arquivo led5050.py está na pasta do código?','try: from led5050 import *',sys.exc_info()[1])
+except Exception: addErros(sys.exc_info()[0],'from Tkinter import *',sys.exc_info()[1])
+
+
+for i in range(len(erros)):
+	print (erros[i])
+	print("\n\n")
+
+
 from decimal import *
-from neopixel import *
 from itertools import product
 from functools import partial
-from tkColorChooser import askcolor
 
-# LED strip configuration:
-LED_COUNT      = 120      # Number of LED pixels.
-LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
-#LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
-LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
-LED_DMA        = 10      # DMA channel to use for generating signal (try 10)
-LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
-LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
-LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
-
-
-# Process arguments
-parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--clear', action='store_true', help='clear the display on exit')
-args = parser.parse_args()
-
-# Create NeoPixel object with appropriate configuration.
-strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
-# Intialize the library (must be called once before other functions).
-strip.begin()
 
 pontoA=pontoB=redLed=greenLed=blueLed=vel = 0
 atalho = 0
@@ -54,6 +66,9 @@ def validateFields():
 		tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
 		return False
 	return True
+
+def desligar():
+	off()
 
 def testLED(event=0):
 	if not validateFields(): return
@@ -122,46 +137,13 @@ def pegarCorLed5050():
 	color = askcolor()
 	fitaLed(color[0][0],color[0][1],color[0][2])
 
-def off():
-	for i in range(LED_COUNT):
-		strip.setPixelColor(i, Color(0,0,0))
-	strip.show()
-
-def bracoLEDEffect(pontoA,pontoB,R,G,B,vel):
-    for i in range(pontoA,pontoB,13):
-        for j in range(i, i+13):
-            strip.setPixelColor(j, Color(B,R,G))
-        strip.show()
-        time.sleep(vel)
-        
-    for i in range(pontoB,pontoA-13,-13):
-        for j in range(i, i+13):
-            strip.setPixelColor(j, Color(0,0,0))
-        strip.show()
-        time.sleep(vel)
-
 def deleteList():
 	lstEffects.delete(lstEffects.curselection())
 
 def updateList():
 	insertEffect(True)
 	if lstEffects.curselection(): lstEffects.delete(lstEffects.curselection())
-	else: tkMessageBox.showinfo("Entrada necessaria", "Preciso saber qual trocarei")
-
-def corteLEDEffect(R,G,B,vel):
-    for i in range(5):
-        if i < 4:
-            for j in range(60+12*i,60+12*(1+i)):
-                strip.setPixelColor(j,Color(B,R,G))
-            for y in range(60-(12*i),60-(12*(1+i)),-1):
-                strip.setPixelColor(y,Color(B,R,G))
-        if i >= 1:
-            for j in range(60+12*(i-1),60+12*i):
-                strip.setPixelColor(j,Color(0,0,0))
-            for y in range(60-12*(i-1),60-12*i,-1):
-                strip.setPixelColor(y,Color(0,0,0))
-        strip.show()
-        time.sleep(vel)	
+	else: tkMessageBox.showinfo("Entrada necessaria", "Preciso saber qual trocarei")	
 
 def on_select():
 	print("Itens:", len(tv.get_children("")))
@@ -390,18 +372,18 @@ def rainbowCycle(strip, wait_ms=20, iterations=5):
         time.sleep(wait_ms/1000.0)
 
 menu = Menu(window)
-new_item = Menu(menu)
+new_item = Menu(menu,tearoff=False)
 new_item.add_command(label='Abrir',command=on_select)
 new_item.add_command(label='Salvar')
 new_item.add_command(label='Salvar como...')
 new_item.add_separator()
-new_item.add_command(label='Desligar LEDs',command=off)
+new_item.add_command(label='Desligar LEDs',command=desligar)
 new_item.add_separator()
 new_item.add_command(label='Resetar App',command=restart_program,accelerator="F9")
 new_item.add_command(label='Sobre')
 menu.add_cascade(label='Arquivo', menu=new_item)
 
-sel_menu = Menu(menu)
+sel_menu = Menu(menu,tearoff=False)
 sel_menu.add_command(label='Pegar RGB',command=pegarCor)
 sel_menu.add_command(label='Pegar RGB 5050',command=pegarCorLed5050)
 menu.add_cascade(label='Selecionar', menu=sel_menu)
@@ -495,7 +477,6 @@ rdbTunnel1.grid(column=1,row=9,sticky=W)
 rdbTunnel1.select()
 
 window.title("Sway LED")
-window.geometry('420x400')
 window.bind_all("<F9>",restart_program)
 window.bind_all("<F2>",atalhosVolta)
 window.bind_all("<F3>",atalhos)
@@ -506,7 +487,6 @@ window.bind_all("e",atalhoE)
 window.bind_all("a",atalhoA)
 window.bind_all("s",atalhoS)
 window.bind_all("d",atalhoD)
-
-strip.begin()
 window.config(menu=menu)
+
 window.mainloop()

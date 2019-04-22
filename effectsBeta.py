@@ -301,13 +301,13 @@ def tresPontos():
             strip.setPixelColor(60-i, Color(100,0,100))
             strip.setPixelColor(i+60, Color(100,0,100))
             strip.setPixelColor(120-i, Color(100,0,100))
-	if (i >= 3):
+        if (i >= 3):
             strip.setPixelColor(i-4, Color(0,0,0))
             strip.setPixelColor(64-i, Color(0,0,0))
             strip.setPixelColor(i+56, Color(0,0,0))
             strip.setPixelColor(124-i, Color(0,0,0))
-	strip.show()
-	time.sleep(.05)
+        strip.show()
+    time.sleep(.05)
     
 def tresPontosInvert():
     for i in range(0,29+6):
@@ -316,13 +316,13 @@ def tresPontosInvert():
             strip.setPixelColor(30+i, Color(0,100,0))
             strip.setPixelColor(90-i, Color(0,100,0))
             strip.setPixelColor(90+i, Color(0,100,0))
-	if (i >= 4):
+        if (i >= 4):
             strip.setPixelColor(34-i, Color(0,0,0))
             strip.setPixelColor(26+i, Color(0,0,0))
             strip.setPixelColor(94-i, Color(0,0,0))
             strip.setPixelColor(86+i, Color(0,0,0))
-	strip.show()
-	time.sleep(.05)
+        strip.show()
+    time.sleep(.05)
 
 def megaman(pontoA,pontoB,R,G,B,vel):
     def intro():
