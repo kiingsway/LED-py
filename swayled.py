@@ -44,11 +44,6 @@ except ImportError: addErros('ImportError: O arquivo led5050.py está na pasta d
 except Exception: addErros(sys.exc_info()[0],'from Tkinter import *',sys.exc_info()[1])
 
 
-for i in range(len(erros)):
-	print (erros[i])
-	print("\n\n")
-
-
 from decimal import *
 from itertools import product
 from functools import partial
@@ -133,7 +128,6 @@ def autoscroll(sbar, first, last):
 
 def janelaErros():
 
-    #janelaParaErros = Toplevel(window)
     janelaParaErros = Toplevel(window)
     janelaParaErros.title("Erros Sway LED")
     
@@ -171,11 +165,11 @@ def janelaErros():
 def pegarCor():
     color = askcolor()
     txtR.delete(0,END)
-    txtR.insert(0,color[0][0])	
+    txtR.insert(0,int(color[0][0]))	
     txtG.delete(0,END)
-    txtG.insert(0,color[0][1])	
+    txtG.insert(0,int(color[0][1]))
     txtB.delete(0,END)
-    txtB.insert(0,color[0][2])
+    txtB.insert(0,int(color[0][2]))
 
 def pegarCorLed5050():
 	color = askcolor()
@@ -404,6 +398,8 @@ def rainbowCycle(strip, wait_ms=20, iterations=5):
         strip.show()
         time.sleep(wait_ms/1000.0)
 
+
+
 menu = Menu(window)
 new_item = Menu(menu,tearoff=False)
 new_item.add_command(label='Desligar LEDs',command=desligar)
@@ -419,7 +415,75 @@ menu.add_cascade(label='Selecionar', menu=sel_menu)
 
 if len(erros) > 0: menu.add_cascade(label='Erros', command=janelaErros)
 
+frameCor = Frame(window, relief=RAISED)
+frameCor.pack(fill=BOTH, expand=True)
 
+lblR = Label(frameCor, text="R:")
+lblR.pack(side=LEFT)
+txtR = Entry(frameCor,width=5)
+txtR.pack(side=LEFT)
+
+lblG = Label(frameCor, text="G:")
+lblG.pack(side=LEFT)
+txtG = Entry(frameCor,width=5)
+txtG.pack(side=LEFT)
+
+lblB = Label(frameCor, text="B:")
+lblB.pack(side=LEFT)
+txtB = Entry(frameCor,width=5)
+txtB.pack(side=LEFT)
+
+botaoColorPicker = Button(frameCor,text='Color Picker',command=pegarCor)
+botaoColorPicker.pack(side=LEFT)
+
+framePontos = Frame(window,relief=RAISED)
+framePontos.pack(fill=BOTH, expand=True)
+
+lblPontoA = Label(framePontos, text="Ponto A:")
+lblPontoA.pack(side=LEFT)
+txtPontoA = Entry(framePontos,width=5,justify='center')
+txtPontoA.pack(side=LEFT)
+
+lblPontoB = Label(framePontos, text="Ponto B:")
+lblPontoB.pack(side=LEFT)
+txtPontoB = Entry(framePontos,width=5,justify='center')
+txtPontoB.pack(side=LEFT)
+
+botaoMostrarSlider = Button(framePontos,text='>')
+botaoMostrarSlider.pack(side=RIGHT)
+
+frameSlider = Frame(window,relief=RAISED)
+frameSlider.pack(fill=BOTH, expand=True)
+
+def attPontos(event=0):
+	txtPontoA.delete(0,END)
+	txtPontoA.insert(0,sliderPontoA.get())
+	txtPontoB.delete(0,END)
+	txtPontoB.insert(0,sliderPontoB.get())
+
+
+sliderPontoA = Scale(frameSlider,from_=0,to_=120,orient=HORIZONTAL,command=attPontos)
+sliderPontoA.pack(side=LEFT,expand=True)
+
+sliderPontoB = Scale(frameSlider,from_=0,to_=120,orient=HORIZONTAL,command=attPontos)
+sliderPontoB.pack(side=LEFT,expand=True)
+
+frameVel = Frame(window,relief=RAISED)
+frameVel.pack(fill=BOTH, expand=True)
+
+lblVel = Label(frameVel, text="Vel:")
+lblVel.pack(side=LEFT)
+txtVel = Entry(frameVel,width=10)
+txtVel.pack(side=LEFT)
+
+lblFuncao1 = Label(window, text="...:")
+lblFuncao1.pack(side=LEFT)
+lblFuncao1.pack_forget()
+txtFuncao1 = Entry(window,width=10)
+txtFuncao1.pack(side=LEFT)
+txtFuncao1.pack_forget()
+
+'''
 lblPontoA = Label(window, text="Ponto A:")
 lblPontoA.grid(column=0, row=0)
 lblPontoB = Label(window, text="Ponto B:")
@@ -506,6 +570,8 @@ rdbTunnel.grid(column=0, row=9)
 rdbTunnel1 = Radiobutton(musicaFrame, text="Tunnel + Bass (A, S)", value=1,variable='tunnelEfeito')
 rdbTunnel1.grid(column=1,row=9,sticky=W)
 rdbTunnel1.select()
+'''
+
 
 window.title("Sway LED")
 window.bind_all("<F9>",restart_program)

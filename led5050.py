@@ -18,8 +18,8 @@ ledGD2A.start(0)               	 	# start the PWM with a 0 percent duty cycle (o
 ledBD2A.start(0)              		  # start the PWM with a 0 percent duty cycle (off)
 
 def fitaLed(r,g,b):
-	ledRD2A.ChangeDutyCycle(r)
-	ledGD2A.ChangeDutyCycle(g)
-	ledBD2A.ChangeDutyCycle(b)
+	ledRD2A.ChangeDutyCycle(int(r))
+	ledGD2A.ChangeDutyCycle(int(g))
+	ledBD2A.ChangeDutyCycle(int(b))
 
 GPIO.cleanup()
