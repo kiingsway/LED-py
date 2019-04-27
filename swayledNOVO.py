@@ -64,6 +64,7 @@ def autoscroll(sbar, first, last):
 
 
 def janelaLightpaint():
+    tam_base = 500
 
     janelaParaLightpaint = Toplevel(window)
     janelaParaLightpaint.title('Lightpaint')
@@ -71,19 +72,55 @@ def janelaLightpaint():
     frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
     frame_imagepicker.grid(column=0,row=0,sticky=W+E+N+S)
 
-    def abrir_imagem():
+    def abrir_imagem1():
+        def thumbnail(img):
+            alt = img.size[0]
+            lar = img.size[1]
+            if alt >= tam_base or lar >= tam_base:
+                if alt > lar:
+                    proporcao = alt / tam_base
+                elif lar >= alt:
+                    proporcao = lar / tam_base
+                nova_alt = alt / proporcao
+                nova_lar = lar / proporcao
+                img = img.resize((int(nova_lar),int(nova_alt)), Image.ANTIALIAS)
+                return img
+
         arquivoImagem = tkinter.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
-        img = ImageTk.PhotoImage(Image.open(arquivoImagem))
-        # img = Image.open(arquivoImagem).convert("RGB")
-        lblImagem = Label(frame_imagepicker, image=img, width=500,height=500)
-        lblImagem.image=img
-        lblImagem.grid(column=0,row=1,columnspan=4)
+        thumbnail_imagem = Image.open(arquivoImagem)
+        img = ImageTk.PhotoImage(thumbnail_imagem)
+        thumbnail_imagem = ImageTk.PhotoImage(thumbnail(thumbnail_imagem))
+        
+
+    def abrir_imagem():
+        def miniatura(img_mini):
+            alt = img_mini.size[0]
+            lar = img_mini.size[1]
+            if alt >= tam_base or lar >= tam_base:
+                if alt > lar:
+                    proporcao = alt / tam_base
+                elif lar >= alt:
+                    proporcao = lar / tam_base
+                nova_alt = alt / proporcao
+                nova_lar = lar / proporcao
+                img_mini = img_mini.resize((int(nova_alt),int(nova_lar)), Image.ANTIALIAS)
+            return img_mini
+
+        arquivoImagem = tkinter.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
+        imagem_miniatura = Image.open(arquivoImagem)
+        imgTk = ImageTk.PhotoImage(miniatura(imagem_miniatura))
+        lblImagem.config(image=imgTk)
+        lblImagem.image = imgTk
+
 
     txtImagem = Entry(frame_imagepicker,state=DISABLED)
     txtImagem.grid(column=0,row=0)
     Button(frame_imagepicker,text='Escolher imagem...',command=abrir_imagem).grid(column=1,row=0)
 
+
+    lblImagem = Label(frame_imagepicker, width=tam_base,height=tam_base)
     abrir_imagem()
+    lblImagem.grid(column=0,row=1,columnspan=4)
 
     frame_velocidade = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
     frame_velocidade.grid(column=1,row=0,sticky=W+E+N+S)
