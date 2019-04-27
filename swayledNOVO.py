@@ -46,6 +46,15 @@ except ModuleNotFoundError: addErros('ModuleNotFoundError: Um módulo não foi e
 except ImportError: addErros('ImportError: O arquivo led5050.py está na pasta do código?','try: from led5050 import *',sys.exc_info()[1])
 except Exception: addErros(sys.exc_info()[0],'from Tkinter import *',sys.exc_info()[1])
 
+def autoscroll(sbar, first, last):
+    """Hide and show scrollbar as needed."""
+    first, last = float(first), float(last)
+    if first <= 0 and last >= 1:
+        sbar.grid_remove()
+    else:
+        sbar.grid()
+    sbar.set(first, last)
+
 def janelaErros():
 
     janelaParaErros = Toplevel(window)
@@ -82,21 +91,42 @@ def janelaErros():
     janelaParaErros.grid_columnconfigure(0, weight=1)
     janelaParaErros.grid_rowconfigure(0, weight=1)
 
+def validateFields():
+    if txtPontoA.get() == '':
+        try: tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
+        except NameError: tkinter.messagebox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
+        return False
+    return True
+
+def testLED(event=0):
+    if not validateFields(): return
+
 def desligar():
-	off()
+    try: off()
+    except: pass
 
 def colorPicker_w2812b():
     color = askcolor()
+    rPicker = int(color[0][0])
+    gPicker = int(color[0][1])
+    bPicker = int(color[0][2])
+
     txtR.delete(0,END)
-    txtR.insert(0,int(color[0][0]))	
+    txtR.insert(0,rPicker)	
     txtG.delete(0,END)
-    txtG.insert(0,int(color[0][1]))
+    txtG.insert(0,gPicker)
     txtB.delete(0,END)
-    txtB.insert(0,int(color[0][2]))
+    txtB.insert(0,bPicker)
+
+    labelTroca_de_Cores(rPicker,gPicker,bPicker)
+
+def labelTroca_de_Cores(R,G,B):
+    lblCores.config(bg=("#%0.2X%0.2X%0.2X" % (R,G,B)))
 
 def colorPicker_5050():
-	color = askcolor()
-	fitaLed(color[0][0],color[0][1],color[0][2])
+    color = askcolor()
+    try: fitaLed(color[0][0],color[0][1],color[0][2])
+    except: print('fitaLed5050 não importada')
 
 def reiniciar_app(event=0):
     """Restarts the current program.
@@ -107,8 +137,14 @@ def reiniciar_app(event=0):
 
 window = Tk()
 
+def character_limit(entry_text, limit_char):
+    if len(entry_text.get()) > limit_char:
+        entry_text.delete(limit_char,END)
+
 menu = Menu(window)
 sel_menu = Menu(menu,tearoff=False)
+sel_menu.add_command(label='Pegar RGB 5050',command=colorPicker_5050)
+sel_menu.add_separator()
 sel_menu.add_command(label='Desligar LEDs',command=desligar)
 sel_menu.add_separator()
 sel_menu.add_command(label='Resetar App',command=reiniciar_app,accelerator="F9")
@@ -116,9 +152,8 @@ sel_menu.add_command(label='Sobre')
 menu.add_cascade(label='Arquivo', menu=sel_menu)
 
 sel_menu = Menu(menu,tearoff=False)
-sel_menu.add_command(label='Pegar RGB',command=colorPicker_w2812b)
-sel_menu.add_command(label='Pegar RGB 5050',command=colorPicker_5050)
-menu.add_cascade(label='Selecionar', menu=sel_menu)
+sel_menu.add_command(label='LightPaint',command=janelaLightpaint)
+menu.add_cascade(label='Efeitos', menu=sel_menu)
 
 if len(erros) > 0: menu.add_cascade(label='Erros', command=janelaErros)
 
@@ -126,34 +161,43 @@ frameWindow = Frame(window, relief=RAISED)
 frameWindow.pack(fill=BOTH, expand=True)
 
 frameCor = Frame(frameWindow, relief=RAISED, padx=10, pady=10, borderwidth=2)
-#frameCor.pack(fill=BOTH, expand=True, side=LEFT)
 frameCor.grid(column=0,row=0,sticky=W+E+N+S)
 
 Label(frameCor, text="R:").grid(column=0, row=0)
-txtR = Entry(frameCor,width=5)
+svR = StringVar()
+svR.trace("w", lambda *args: character_limit(txtR,3))
+txtR = Entry(frameCor,width=5,textvariable=svR)
 txtR.grid(column=1, row=0)
 
 Label(frameCor, text="G:").grid(column=0, row=1)
-txtG = Entry(frameCor,width=5)
+svG = StringVar()
+svG.trace("w", lambda *args: character_limit(txtG,3))
+txtG = Entry(frameCor,width=5,textvariable=svG)
 txtG.grid(column=1, row=1)
 
 Label(frameCor, text="B:").grid(column=0, row=2)
-txtB = Entry(frameCor,width=5)
+svB = StringVar()
+svB.trace("w", lambda *args: character_limit(txtB,3))
+txtB = Entry(frameCor,width=5,textvariable=svB)
 txtB.grid(column=1, row=2)
 
-Label(frameCor, text='Amostra de cores', bg="red").grid(column=2, row=0, rowspan=3, sticky=W+E+N+S)
-Button(frameCor, text='Color Picker',command=colorPicker_w2812b).grid(column=0, row=3,columnspan=3, sticky=W+E) # JUSTIFICAR NA DIREITA
+lblCores = Label(frameCor, text='Amostra de cores', bg="red")
+lblCores.grid(column=2, row=0, rowspan=3, sticky=W+E+N+S)
+Button(frameCor, text='Color Picker',command=colorPicker_w2812b).grid(column=0, row=3,columnspan=3, sticky=W+E)
 
 framePonto = Frame(frameWindow, relief=RAISED, padx=10, pady=10, borderwidth=2)
-#framePonto.pack(fill=BOTH, expand=True, side=LEFT)
 framePonto.grid(column=1,row=0,sticky=W+E+N+S)
 
 Label(framePonto, text="Ponto A:").grid(column=0, row=0)
-txtPontoA = Entry(framePonto,width=5)
+svPA = StringVar()
+svPA.trace("w", lambda *args: character_limit(txtPontoA,3))
+txtPontoA = Entry(framePonto,width=5,textvariable=svPA)
 txtPontoA.grid(column=1, row=0,sticky=W)
 
 Label(framePonto, text="Ponto B:").grid(column=2, row=0)
-txtPontoB = Entry(framePonto,width=5)
+svPB = StringVar()
+svPB.trace("w", lambda *args: character_limit(txtPontoB,3))
+txtPontoB = Entry(framePonto,width=5,textvariable=svPB)
 txtPontoB.grid(column=3, row=0)
 
 Label(framePonto, text="Vel:").grid(column=0, row=1,sticky=E)
@@ -182,7 +226,7 @@ frameBotaoTocar = Frame(frameWindow, relief=RAISED, padx=10, pady=10, borderwidt
 #frameBotaoTocar.pack(fill=BOTH, expand=True, side=BOTTOM)
 frameBotaoTocar.grid(column=0,row=1,columnspan=2,sticky=W+E)
 
-Button(frameBotaoTocar,text='LIGHTS ON!',width=50).grid(column=0,row=0)
+Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=testLED).grid(column=0,row=0)
 
 window.config(menu=menu)
 window.title("Sway LED")
