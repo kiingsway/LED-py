@@ -32,6 +32,10 @@ except ImportError: import tkinter.messagebox
 try: from tkColorChooser import askcolor
 except ImportError: from tkinter.colorchooser import askcolor
 
+try: import tkFileDialog
+except ImportError: import tkinter.filedialog
+except: addErros("tkinter instalado?","try: import tkFileDialog",sys.exc_info()[1])
+
 try: from effects import *
 except ImportError: addErros('ImportError: O arquivo efeitos.py está na pasta do código?','from effects import *',sys.exc_info()[1])
 except NotImplementedError:	addErros('NotImplementedError: Erro na importação da biblioteca effects.py','from effects import *',sys.exc_info()[1])
@@ -46,6 +50,9 @@ except ModuleNotFoundError: addErros('ModuleNotFoundError: Um módulo não foi e
 except ImportError: addErros('ImportError: O arquivo led5050.py está na pasta do código?','try: from led5050 import *',sys.exc_info()[1])
 except Exception: addErros(sys.exc_info()[0],'from Tkinter import *',sys.exc_info()[1])
 
+# Lightpainting
+from PIL import ImageTk, Image
+
 def autoscroll(sbar, first, last):
     """Hide and show scrollbar as needed."""
     first, last = float(first), float(last)
@@ -54,6 +61,37 @@ def autoscroll(sbar, first, last):
     else:
         sbar.grid()
     sbar.set(first, last)
+
+
+def janelaLightpaint():
+
+    janelaParaLightpaint = Toplevel(window)
+    janelaParaLightpaint.title('Lightpaint')
+
+    frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
+    frame_imagepicker.grid(column=0,row=0,sticky=W+E+N+S)
+
+    def abrir_imagem():
+        arquivoImagem = tkinter.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
+        img = ImageTk.PhotoImage(Image.open(arquivoImagem))
+        # img = Image.open(arquivoImagem).convert("RGB")
+        lblImagem = Label(frame_imagepicker, image=img, width=500,height=500)
+        lblImagem.image=img
+        lblImagem.grid(column=0,row=1,columnspan=4)
+
+    txtImagem = Entry(frame_imagepicker,state=DISABLED)
+    txtImagem.grid(column=0,row=0)
+    Button(frame_imagepicker,text='Escolher imagem...',command=abrir_imagem).grid(column=1,row=0)
+
+    abrir_imagem()
+
+    frame_velocidade = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
+    frame_velocidade.grid(column=1,row=0,sticky=W+E+N+S)
+
+    Button(frame_velocidade,text='-').grid(column=0,row=1,sticky=W)
+    txtVelocidade = Entry(frame_velocidade)
+    txtVelocidade.grid(column=1,row=1,sticky=W)
+    Button(frame_velocidade,text='+').grid(column=2,row=1,sticky=W)
 
 def janelaErros():
 
@@ -158,7 +196,7 @@ menu.add_cascade(label='Efeitos', menu=sel_menu)
 if len(erros) > 0: menu.add_cascade(label='Erros', command=janelaErros)
 
 frameWindow = Frame(window, relief=RAISED)
-frameWindow.pack(fill=BOTH, expand=True)
+frameWindow.grid(column=0,row=0)
 
 frameCor = Frame(frameWindow, relief=RAISED, padx=10, pady=10, borderwidth=2)
 frameCor.grid(column=0,row=0,sticky=W+E+N+S)
@@ -223,7 +261,6 @@ cmbEffects.grid(column=1, row=2,columnspan=3)
 #cmbEffects.bind("<<ComboboxSelected>>", mostrarTxtFuncao)
 
 frameBotaoTocar = Frame(frameWindow, relief=RAISED, padx=10, pady=10, borderwidth=1)
-#frameBotaoTocar.pack(fill=BOTH, expand=True, side=BOTTOM)
 frameBotaoTocar.grid(column=0,row=1,columnspan=2,sticky=W+E)
 
 Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=testLED).grid(column=0,row=0)
