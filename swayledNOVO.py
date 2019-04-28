@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import random
+import globals
 import argparse
 import threading
 from decimal import *
@@ -27,13 +28,13 @@ except ImportError: import tkinter.ttk as ttk
 except Exception: addErros((str(sys.exc_info()[0])+': ttk está instalado?'),'from Tkinter import *',sys.exc_info()[1])
 
 try: import tkMessageBox
-except ImportError: import tkinter.messagebox
+except ImportError: import tkinter.messagebox as tkMessageBox
 
 try: from tkColorChooser import askcolor
 except ImportError: from tkinter.colorchooser import askcolor
 
 try: import tkFileDialog
-except ImportError: import tkinter.filedialog
+except ImportError: import tkinter.filedialog as tkFileDialog
 except: addErros("tkinter instalado?","try: import tkFileDialog",sys.exc_info()[1])
 
 try: from effects import *
@@ -69,6 +70,7 @@ def autoscroll(sbar, first, last):
 
 def janelaLightpaint():
     tam_base = 500
+    velocidade = 100
 
     janelaParaLightpaint = Toplevel(window)
     janelaParaLightpaint.title('Lightpaint')
@@ -90,21 +92,35 @@ def janelaLightpaint():
                 img_mini = img_mini.resize((int(nova_alt),int(nova_lar)), Image.ANTIALIAS)
             return img_mini
 
-        try: arquivoImagem = tkinter.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
-        except AttributeError: arquivoImagem = tkFileDialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
+        local_arquivo = tkFileDialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
         txtImagem.delete(0,END)
-        txtImagem.insert(0,arquivoImagem.split('/')[-1])
-        imagem_miniatura = Image.open(arquivoImagem).convert("RGB")
-        imgTk = ImageTk.PhotoImage(miniatura(imagem_miniatura))
-        lblImagem.config(image=imgTk)
-        lblImagem.image = imgTk
-        lightpaintingThread = threading.Thread(target=lp,args=(imagem_miniatura,100,))
-        lightpaintingThread.start()
+        txtImagem.insert(0,local_arquivo.split('/')[-1])
+        try:
+            globals.imagem_arquivo = Image.open(local_arquivo).convert("RGB")
+            imgTk = ImageTk.PhotoImage(miniatura(globals.imagem_arquivo))
+            lblImagem.config(image=imgTk)
+            lblImagem.image = imgTk
+            lightpaintingThread = threading.Thread(target=lp,args=(velocidade,))
+            lightpaintingThread.start()
+            globals.lpLigado = True
+        except AttributeError: print('Upload da imagem cancelado')
+
+    def play_pausePainting():
+        if globals.lpLigado:
+            lp.parar_painting = True
+            btnPl.config(text='Tocar')
+            globals.lpLigado = False
+        else:
+            lightpaintingThread = threading.Thread(target=lp,args=(velocidade,))
+            lightpaintingThread.start()
+            btnPl.config(text='Pausar')
+            globals.lpLigado = True
 
     txtImagem = Entry(frame_imagepicker)
     txtImagem.grid(column=0,row=0)
     Button(frame_imagepicker,text='Escolher imagem...',command=abrir_imagem).grid(column=1,row=0)
-
+    btnPl = Button(frame_imagepicker,text='Pausar',command= lambda: play_pausePainting())
+    btnPl.grid(column=2,row=0)
 
     lblImagem = Label(frame_imagepicker, width=tam_base,height=tam_base)
     abrir_imagem()
@@ -156,8 +172,7 @@ def janelaErros():
 
 def validateFields():
     if txtPontoA.get() == '':
-        try: tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
-        except NameError: tkinter.messagebox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
+        tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
         return False
     return True
 

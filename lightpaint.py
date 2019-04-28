@@ -7,9 +7,11 @@
 # Based on https://github.com/scottjgibson/PixelPi
 
 import time
+import globals
 try: from neopixel import *
 except:
-    def Color(r,g,b): print("R: %x    G: %x    B: %x")
+    def Color(r,g,b): pass
+    # def Color(r,g,b): print("R: %x    G: %x    B: %x", (r,g,b),end='\r')
 import argparse
 
 # Lightpainting
@@ -33,10 +35,12 @@ try:
 except:
     print('Estamos sem LEDs :(')
 
-def lightpainting(img,frame_rate):
+def lightpainting(frame_rate):
 
-    print(img.size[0])
-    print(img.size[1])
+    img = globals.imagem_arquivo
+
+    print("Largura: {}".format(img.size[0]))
+    print("Altura: {}".format(img.size[1]))
 
     # Check that the height of the image is greater than or equal the number of LEDs on the strip
     if(img.size[1] < LED_COUNT):
@@ -59,6 +63,8 @@ def lightpainting(img,frame_rate):
             column[x][y] = Color(value[1], value[0], value[2])
 
     while True:
+        global parar_painting
+        print("parar_painting de lightpaint.py diz: {}".format(globals.lpLigado))
         # Wait for button to be pressed before displaying image
         #if not loop:
             #print("Waiting for button to be pressed")
@@ -87,3 +93,6 @@ def lightpainting(img,frame_rate):
         # Wait for `frame_rate` ms before drawing a new frame
         time.sleep(frame_rate / 1000.0)
 
+        if not globals.lpLigado:
+            print("parar_painting de lightpaint.py diz: {}".format(globals.lpLigado))
+            break
