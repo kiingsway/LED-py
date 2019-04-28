@@ -44,6 +44,10 @@ try: from effectsBeta import *
 except ImportError: addErros('ImportError: O arquivo efeitosBeta.py está na pasta do código?','from effectsBeta import *',sys.exc_info()[1])
 except NotImplementedError:	addErros('NotImplementedError: Erro no código da biblioteca effectsBeta.py','from effectsBeta import *',sys.exc_info()[1])
 
+try: from lightpaint import lightpainting as lp
+except ImportError: addErros('ImportError: O arquivo lightpaint.py está na pasta do código?','from effectsBeta import *',sys.exc_info()[1])
+except NotImplementedError: addErros('NotImplementedError: Erro no código da biblioteca lightpaint.py','import lightpaint',sys.exc_info()[1])
+
 try: from led5050 import *
 except NotImplementedError:	addErros('NotImplementedError: Erro no código da biblioteca led5050.py','try: from led5050 import *',sys.exc_info()[1])
 except ModuleNotFoundError: addErros('ModuleNotFoundError: Um módulo não foi executado','from led5050 import *',sys.exc_info()[1])
@@ -70,27 +74,7 @@ def janelaLightpaint():
     janelaParaLightpaint.title('Lightpaint')
 
     frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
-    frame_imagepicker.grid(column=0,row=0,sticky=W+E+N+S)
-
-    def abrir_imagem1():
-        def thumbnail(img):
-            alt = img.size[0]
-            lar = img.size[1]
-            if alt >= tam_base or lar >= tam_base:
-                if alt > lar:
-                    proporcao = alt / tam_base
-                elif lar >= alt:
-                    proporcao = lar / tam_base
-                nova_alt = alt / proporcao
-                nova_lar = lar / proporcao
-                img = img.resize((int(nova_lar),int(nova_alt)), Image.ANTIALIAS)
-                return img
-
-        arquivoImagem = tkinter.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
-        thumbnail_imagem = Image.open(arquivoImagem)
-        img = ImageTk.PhotoImage(thumbnail_imagem)
-        thumbnail_imagem = ImageTk.PhotoImage(thumbnail(thumbnail_imagem))
-        
+    frame_imagepicker.grid(column=0,row=0,sticky=W+E+N+S)     
 
     def abrir_imagem():
         def miniatura(img_mini):
@@ -106,14 +90,18 @@ def janelaLightpaint():
                 img_mini = img_mini.resize((int(nova_alt),int(nova_lar)), Image.ANTIALIAS)
             return img_mini
 
-        arquivoImagem = tkinter.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
-        imagem_miniatura = Image.open(arquivoImagem)
+        try: arquivoImagem = tkinter.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
+        except AttributeError: arquivoImagem = tkFileDialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
+        txtImagem.delete(0,END)
+        txtImagem.insert(0,arquivoImagem.split('/')[-1])
+        imagem_miniatura = Image.open(arquivoImagem).convert("RGB")
         imgTk = ImageTk.PhotoImage(miniatura(imagem_miniatura))
         lblImagem.config(image=imgTk)
         lblImagem.image = imgTk
+        lightpaintingThread = threading.Thread(target=lp,args=(imagem_miniatura,100,))
+        lightpaintingThread.start()
 
-
-    txtImagem = Entry(frame_imagepicker,state=DISABLED)
+    txtImagem = Entry(frame_imagepicker)
     txtImagem.grid(column=0,row=0)
     Button(frame_imagepicker,text='Escolher imagem...',command=abrir_imagem).grid(column=1,row=0)
 
