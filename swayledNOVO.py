@@ -69,32 +69,43 @@ def autoscroll(sbar, first, last):
 
 
 def janelaLightpaint():
-    tam_base = 500
-    velocidade = 100
+    tam_base = 300
 
     janelaParaLightpaint = Toplevel(window)
     janelaParaLightpaint.title('Lightpaint')
-    janelaParaLightpaint.geometry('800x800')
+    # janelaParaLightpaint.geometry('900x400')
 
-    frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
-    frame_imagepicker.grid(column=0,row=0,sticky=W+E+N+S)
 
-    def velocidade_aumdim(aumentar):
+
+    def frame_maismenos(aumentar):
         if aumentar:
-            if globals.velocidade < 1000:
-                globals.velocidade += 100
-                lblVelocidade.delete(0,END)
-                lblVelocidade.insert(0,globals.velocidade)
+            if globals.taxa_frame < 1000:
+                globals.taxa_frame += 100
+                lblFrame.delete(0,END)
+                lblFrame.insert(0,globals.taxa_frame)
         else:
-            if globals.velocidade > 100:
-                globals.velocidade -= 100
-                lblVelocidade.delete(0,END)
-                lblVelocidade.insert(0,globals.velocidade)
+            if globals.taxa_frame > 100:
+                globals.taxa_frame -= 100
+                lblFrame.delete(0,END)
+                lblFrame.insert(0,globals.taxa_frame)
+
+
+    def coluna_maismenos(aumentar):
+        if aumentar:
+            if globals.taxa_coluna < 10:
+                globals.taxa_coluna += 1
+                lblColuna.delete(0,END)
+                lblColuna.insert(0,globals.taxa_coluna)
+        else:
+            if globals.taxa_coluna > 1:
+                globals.taxa_coluna -= 1
+                lblColuna.delete(0,END)
+                lblColuna.insert(0,globals.taxa_coluna)
 
     def trocar_velocidade():
-        globals.velocidade = int(lblVelocidade.get())
-        print('Velocidade setada')
-        print(globals.velocidade)
+        globals.taxa_frame = int(lblFrame.get())
+        globals.taxa_coluna = int(lblColuna.get())
+
 
     def abrir_imagem():
         def miniatura(img_mini):
@@ -134,24 +145,63 @@ def janelaLightpaint():
             btnPl.config(text='Pausar')
             globals.lpLigado = True
 
-    txtImagem = Entry(frame_imagepicker)
+    def reverter(alvo):
+        if alvo == 'x':
+            if ckb1.get() == 1:
+                globals.reverter_x = True
+            else:
+                globals.reverter_x = False
+        if alvo == 'y':
+            if ckb2.get() == 1:
+                globals.reverter_y = True
+            else:
+                globals.reverter_y = False
+
+
+    frame_campos1 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
+    frame_campos1.grid(column=0,row=0)
+
+    txtImagem = Entry(frame_campos1,width=40)
     txtImagem.grid(column=0,row=0)
-    Button(frame_imagepicker,text='Escolher imagem...',command=abrir_imagem).grid(column=1,row=0)
-    btnPl = Button(frame_imagepicker,text='Pausar',command= lambda: play_pausePainting())
+    Button(frame_campos1,text='Escolher imagem...',command=abrir_imagem).grid(column=1,row=0)
+    btnPl = Button(frame_campos1,text='Pausar',command= lambda: play_pausePainting())
     btnPl.grid(column=2,row=0)
 
+    frame_campos2 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
+    frame_campos2.grid(column=0,row=1)
+
+    Label(frame_campos2,text='Taxa Frame:').grid(column=0,row=0)
+    Button(frame_campos2,text='-',command=lambda:frame_maismenos(False)).grid(column=1,row=0)
+    lblFrame = Entry(frame_campos2,width=5)
+    lblFrame.insert(0,globals.taxa_frame)
+    lblFrame.grid(column=2,row=0)
+    Button(frame_campos2,text='+',command=lambda:frame_maismenos(True)).grid(column=3,row=0)
+    Button(frame_campos2,text='Trocar velocidade',command=trocar_velocidade).grid(column=4,row=0)
+
+    frame_campos3 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
+    frame_campos3.grid(column=0,row=2)
+
+    Label(frame_campos3,text='Taxa Coluna:').grid(column=0,row=0)
+    Button(frame_campos3,text='-',command=lambda:coluna_maismenos(False)).grid(column=1,row=0)
+    lblColuna = Entry(frame_campos3,width=5)
+    lblColuna.insert(0,globals.taxa_coluna)
+    lblColuna.grid(column=2,row=0)
+    Button(frame_campos3,text='+',command=lambda:coluna_maismenos(True)).grid(column=3,row=0)
+    Button(frame_campos3,text='Trocar velocidade',command=trocar_velocidade).grid(column=4,row=0)
+
+    frame_campos4 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
+    frame_campos4.grid(column=0,row=3)
+
+    ckb1 = IntVar()
+    ckb2 = IntVar()
+    Checkbutton(frame_campos4, text='Reverter X', variable=ckb1, command=lambda:reverter('x') ).grid(row=0,column=0)
+    Checkbutton(frame_campos4, text='Reverter Y', variable=ckb2, command=lambda:reverter('y') ).grid(row=0,column=1)
+
+    frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED,bd=5)
+    frame_imagepicker.grid(column=1,row=0,rowspan=4)
+
     lblImagem = Label(frame_imagepicker, width=tam_base,height=tam_base)
-    lblImagem.grid(column=0,row=1,columnspan=4)
-
-    frame_velocidade = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
-    frame_velocidade.grid(column=1,row=0,sticky=W+E+N+S)
-
-    Button(frame_velocidade,text='-',command=lambda:velocidade_aumdim(False)).grid(column=0,row=1,sticky=W)
-    lblVelocidade = Entry(frame_velocidade)
-    lblVelocidade.insert(0,velocidade)
-    lblVelocidade.grid(column=1,row=1,sticky=W)
-    Button(frame_velocidade,text='+',command=lambda:velocidade_aumdim(True)).grid(column=2,row=1,sticky=W)
-    Button(frame_velocidade,text='Trocar velocidade',command=trocar_velocidade).grid(column=3,row=1,sticky=W)
+    lblImagem.grid(column=1,row=0)
     abrir_imagem()
 
 def janelaErros():

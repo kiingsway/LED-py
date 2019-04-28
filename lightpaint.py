@@ -62,8 +62,11 @@ def lightpainting():
             column[x][y] = Color(value[1], value[0], value[2])
 
     while True:
-        frame_rate = globals.velocidade
-        print("Lightpainting rodando em velocidade {}...".format(frame_rate))
+        frame_rate = globals.taxa_frame
+        column_rate = globals.taxa_coluna
+        reverse_x = globals.reverter_x
+        reverse_y = globals.reverter_y
+        print("LP rodando - frame_rate: {} | column_rate: {} | reverse_x: {} | reverse_y: {}".format(frame_rate, column_rate, reverse_x, reverse_y))
         # Wait for button to be pressed before displaying image
         #if not loop:
             #print("Waiting for button to be pressed")
@@ -71,12 +74,14 @@ def lightpainting():
             #time.sleep(0.5)
 
         x_range = range(image_width)
-        # if reverse_x:
-            # x_range.reverse()
+        if reverse_x:
+            try: x_range.reverse()
+            except: pass
 
         y_range = range(LED_COUNT)
-        # if reverse_y:
-            # y_range.reverse()
+        if reverse_y:
+            try: y_range.reverse()
+            except: pass
 
         for x in x_range:
             led_pos = 0
@@ -86,13 +91,12 @@ def lightpainting():
                 led_pos += 1
             try: strip.show()
             except: pass
-            #time.sleep(column_rate / 1000.0)
-            time.sleep(0.01)
+            time.sleep(column_rate / 1000.0)
+            # time.sleep(0.01)
             
-            if not globals.lpLigado:
-                print("Parando lightpainting...")
-                break
         # Wait for `frame_rate` ms before drawing a new frame
         time.sleep(frame_rate / 1000.0)
 
-        
+        if not globals.lpLigado:
+            print("Parando lightpainting...")
+            break

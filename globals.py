@@ -8,3 +8,9 @@ lpLigado = False
 imagem_arquivo = ''
 #	Armazena a entrada de velocidade (swayled.py) para o lightpainting (lightpaint.py)
 velocidade = 100
+
+taxa_coluna = 1
+taxa_frame = 100
+
+reverter_x = False
+reverter_y = False
