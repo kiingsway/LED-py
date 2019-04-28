@@ -292,4 +292,6 @@ Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=testLED).grid(column=0
 
 window.config(menu=menu)
 window.title("Sway LED")
+window.bind_all("<F9>",restart_program)
+window.bind_all("<Return>",testLED)
 window.mainloop()

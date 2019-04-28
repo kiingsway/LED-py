@@ -24,7 +24,7 @@ except ImportError: import tkinter.ttk as ttk
 except Exception: addErros((str(sys.exc_info()[0])+': ttk está instalado?'),'from Tkinter import *',sys.exc_info()[1])
 
 try: import tkMessageBox
-except ImportError: import tkinter.messagebox
+except ImportError: import tkinter.messagebox as tkMessageBox
 
 try: from tkColorChooser import askcolor
 except ImportError: from tkinter.colorchooser import askcolor
