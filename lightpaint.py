@@ -35,18 +35,17 @@ try:
 except:
     print('Estamos sem LEDs :(')
 
-def lightpainting(frame_rate):
+def lightpainting():
 
     img = globals.imagem_arquivo
 
-    print("Largura: {}".format(img.size[0]))
-    print("Altura: {}".format(img.size[1]))
+    print("Tamanho: {}x{}".format(img.size[0],img.size[1]))
 
     # Check that the height of the image is greater than or equal the number of LEDs on the strip
     if(img.size[1] < LED_COUNT):
         raise Exception("Image height is smaller than led strip size. Required height = {}".format(LED_COUNT))
     elif(img.size[1] > LED_COUNT):
-        print ("Resizing image")
+        print ("Redimensionando a imagem...")
         new_width  = LED_COUNT * img.size[0] / img.size[1]
         img = img.resize((int(new_width), LED_COUNT), Image.ANTIALIAS)
 
@@ -63,8 +62,8 @@ def lightpainting(frame_rate):
             column[x][y] = Color(value[1], value[0], value[2])
 
     while True:
-        global parar_painting
-        print("parar_painting de lightpaint.py diz: {}".format(globals.lpLigado))
+        frame_rate = globals.velocidade
+        print("Lightpainting rodando em velocidade {}...".format(frame_rate))
         # Wait for button to be pressed before displaying image
         #if not loop:
             #print("Waiting for button to be pressed")
@@ -89,10 +88,11 @@ def lightpainting(frame_rate):
             except: pass
             #time.sleep(column_rate / 1000.0)
             time.sleep(0.01)
-
+            
+            if not globals.lpLigado:
+                print("Parando lightpainting...")
+                break
         # Wait for `frame_rate` ms before drawing a new frame
         time.sleep(frame_rate / 1000.0)
 
-        if not globals.lpLigado:
-            print("parar_painting de lightpaint.py diz: {}".format(globals.lpLigado))
-            break
+        

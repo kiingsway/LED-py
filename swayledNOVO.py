@@ -74,9 +74,27 @@ def janelaLightpaint():
 
     janelaParaLightpaint = Toplevel(window)
     janelaParaLightpaint.title('Lightpaint')
+    janelaParaLightpaint.geometry('800x800')
 
     frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
-    frame_imagepicker.grid(column=0,row=0,sticky=W+E+N+S)     
+    frame_imagepicker.grid(column=0,row=0,sticky=W+E+N+S)
+
+    def velocidade_aumdim(aumentar):
+        if aumentar:
+            if globals.velocidade < 1000:
+                globals.velocidade += 100
+                lblVelocidade.delete(0,END)
+                lblVelocidade.insert(0,globals.velocidade)
+        else:
+            if globals.velocidade > 100:
+                globals.velocidade -= 100
+                lblVelocidade.delete(0,END)
+                lblVelocidade.insert(0,globals.velocidade)
+
+    def trocar_velocidade():
+        globals.velocidade = int(lblVelocidade.get())
+        print('Velocidade setada')
+        print(globals.velocidade)
 
     def abrir_imagem():
         def miniatura(img_mini):
@@ -100,7 +118,7 @@ def janelaLightpaint():
             imgTk = ImageTk.PhotoImage(miniatura(globals.imagem_arquivo))
             lblImagem.config(image=imgTk)
             lblImagem.image = imgTk
-            lightpaintingThread = threading.Thread(target=lp,args=(velocidade,))
+            lightpaintingThread = threading.Thread(target=lp)
             lightpaintingThread.start()
             globals.lpLigado = True
         except AttributeError: print('Upload da imagem cancelado')
@@ -111,7 +129,7 @@ def janelaLightpaint():
             btnPl.config(text='Tocar')
             globals.lpLigado = False
         else:
-            lightpaintingThread = threading.Thread(target=lp,args=(velocidade,))
+            lightpaintingThread = threading.Thread(target=lp)
             lightpaintingThread.start()
             btnPl.config(text='Pausar')
             globals.lpLigado = True
@@ -123,16 +141,18 @@ def janelaLightpaint():
     btnPl.grid(column=2,row=0)
 
     lblImagem = Label(frame_imagepicker, width=tam_base,height=tam_base)
-    abrir_imagem()
     lblImagem.grid(column=0,row=1,columnspan=4)
 
     frame_velocidade = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
     frame_velocidade.grid(column=1,row=0,sticky=W+E+N+S)
 
-    Button(frame_velocidade,text='-').grid(column=0,row=1,sticky=W)
-    txtVelocidade = Entry(frame_velocidade)
-    txtVelocidade.grid(column=1,row=1,sticky=W)
-    Button(frame_velocidade,text='+').grid(column=2,row=1,sticky=W)
+    Button(frame_velocidade,text='-',command=lambda:velocidade_aumdim(False)).grid(column=0,row=1,sticky=W)
+    lblVelocidade = Entry(frame_velocidade)
+    lblVelocidade.insert(0,velocidade)
+    lblVelocidade.grid(column=1,row=1,sticky=W)
+    Button(frame_velocidade,text='+',command=lambda:velocidade_aumdim(True)).grid(column=2,row=1,sticky=W)
+    Button(frame_velocidade,text='Trocar velocidade',command=trocar_velocidade).grid(column=3,row=1,sticky=W)
+    abrir_imagem()
 
 def janelaErros():
 
