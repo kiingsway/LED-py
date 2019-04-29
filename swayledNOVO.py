@@ -55,7 +55,8 @@ except ImportError: addErros('ImportError: O arquivo led5050.py está na pasta d
 except Exception: addErros(sys.exc_info()[0],'from Tkinter import *',sys.exc_info()[1])
 
 # Lightpainting
-from PIL import ImageTk, Image
+try: from PIL import ImageTk, Image
+except: print('Sem bibliotecas de imagem. Instale-as com: pip install Pillow')
 
 def autoscroll(sbar, first, last):
     """Hide and show scrollbar as needed."""
@@ -183,13 +184,25 @@ def colorPicker_w2812b():
 
     labelTroca_de_Cores(rPicker,gPicker,bPicker)
 
+def label_trocarCores(sv):
+    if txtR.get() == '': corVermelha = 0
+    else: corVermelha = int(txtR.get())
+    if txtG.get() == '': corVerde = 0
+    else: corVerde = int(txtG.get())
+    if txtB.get() == '': corAzul = 0
+    else: corAzul = int(txtB.get())
+    labelTroca_de_Cores(corVermelha, corVerde, corAzul)
+
 def labelTroca_de_Cores(R,G,B):
-    lblCores.config(bg=("#%0.2X%0.2X%0.2X" % (R,G,B)))
+    novas_cores = "#%0.2X%0.2X%0.2X" % (R,G,B)
+    # lblCores.config(bg=novas_cores)
+    try: lblCores.config(bg=novas_cores)
+    except TclError: print ("Cor inválida: R:{} G:{} B:{} {}".format(R,G,B,novas_cores))
 
 def colorPicker_5050():
     color = askcolor()
     try: fitaLed(color[0][0],color[0][1],color[0][2])
-    except: print('fitaLed5050 não importada')
+    except: print ("LEDs 5050 (não endereçáveis) não foi adicionado")
 
 def reiniciar_app(event=0):
     """Restarts the current program.
@@ -226,21 +239,25 @@ frameWindow.grid(column=0,row=0)
 frameCor = Frame(frameWindow, relief=RAISED, padx=10, pady=10, borderwidth=2)
 frameCor.grid(column=0,row=0,sticky=W+E+N+S)
 
-Label(frameCor, text="R:").grid(column=0, row=0)
 svR = StringVar()
+svG = StringVar()
+svB = StringVar()
+svR.trace("w", lambda name, index, mode, sv=svR: label_trocarCores(svR))
+svG.trace("w", lambda name, index, mode, sv=svG: label_trocarCores(svG))
+svB.trace("w", lambda name, index, mode, sv=svB: label_trocarCores(svB))
 svR.trace("w", lambda *args: character_limit(txtR,3))
+svG.trace("w", lambda *args: character_limit(txtG,3))
+svB.trace("w", lambda *args: character_limit(txtB,3))
+
+Label(frameCor, text="R:").grid(column=0, row=0)
 txtR = Entry(frameCor,width=5,textvariable=svR)
 txtR.grid(column=1, row=0)
 
 Label(frameCor, text="G:").grid(column=0, row=1)
-svG = StringVar()
-svG.trace("w", lambda *args: character_limit(txtG,3))
 txtG = Entry(frameCor,width=5,textvariable=svG)
 txtG.grid(column=1, row=1)
 
 Label(frameCor, text="B:").grid(column=0, row=2)
-svB = StringVar()
-svB.trace("w", lambda *args: character_limit(txtB,3))
 txtB = Entry(frameCor,width=5,textvariable=svB)
 txtB.grid(column=1, row=2)
 
@@ -292,6 +309,6 @@ Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=testLED).grid(column=0
 
 window.config(menu=menu)
 window.title("Sway LED")
-window.bind_all("<F9>",restart_program)
+window.bind_all("<F9>",reiniciar_app)
 window.bind_all("<Return>",testLED)
 window.mainloop()
