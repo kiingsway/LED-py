@@ -74,7 +74,7 @@ def janelaLightpaint():
     janelaParaLightpaint = Toplevel(window)
     janelaParaLightpaint.title('Lightpaint')
 
-    frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
+    frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=GROOVE)
     frame_imagepicker.grid(column=0,row=0,sticky=W+E+N+S)     
 
     def abrir_imagem():
@@ -111,7 +111,7 @@ def janelaLightpaint():
     abrir_imagem()
     lblImagem.grid(column=0,row=1,columnspan=4)
 
-    frame_velocidade = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED)
+    frame_velocidade = Frame(janelaParaLightpaint,padx=10, pady=10,relief=GROOVE)
     frame_velocidade.grid(column=1,row=0,sticky=W+E+N+S)
 
     Button(frame_velocidade,text='-').grid(column=0,row=1,sticky=W)
@@ -165,6 +165,52 @@ def validateFields():
 def testLED(event=0):
     if not validateFields(): return
 
+    pontoA = int(txtPontoA.get())
+    if txtPontoB.get() == '': pontoB = pontoA
+    else: pontoB = int(txtPontoB.get())
+    if txtR.get() == '': redLed = 0
+    else: redLed = int(txtR.get())
+    if txtG.get() == '': greenLed = 0
+    else: greenLed = int(txtG.get())
+    if txtB.get() == '': blueLed = 0
+    else: blueLed = int(txtB.get())
+    if txtVel.get() == '': vel = 0.1
+    else: vel = float(txtVel.get())
+
+    if txtFuncao1.get() == '': funcao1 = 3
+    else: funcao1 = int(txtFuncao1.get())
+
+    if cmbEffects.current() == 0:
+        testThread = threading.Thread(target=acenderLEDEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,))
+        testThread.start()
+    if cmbEffects.current() == 1:
+        testThread = threading.Thread(target=simpleBassEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
+        testThread.start()
+    if cmbEffects.current() == 2:
+        testThread = threading.Thread(target=bassBracoEffectBETA,args=(pontoB/10,redLed,greenLed,blueLed,vel,))
+        testThread.start()
+    if cmbEffects.current() == 3:
+        testThread = threading.Thread(target=corteCobraEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1,))
+        testThread.start()
+    if cmbEffects.current() == 4:
+        testThread = threading.Thread(target=laserLeftEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1,))
+        testThread.start()
+    if cmbEffects.current() == 5:
+        testThread = threading.Thread(target=corteEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
+        testThread.start()
+    if cmbEffects.current() == 6:
+        testThread = threading.Thread(target=teatroEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1))
+        testThread.start()
+    if cmbEffects.current() == 7:
+        testThread = threading.Thread(target=posAleatoriaFade,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
+        testThread.start()
+    if cmbEffects.current() == 8:
+        testThread = threading.Thread(target=bassBracoInvertEffect2,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
+        testThread.start()
+    if cmbEffects.current() == 9:
+        testThread = threading.Thread(target=megaman,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
+        testThread.start()
+
 def desligar():
     try: off()
     except: pass
@@ -204,6 +250,26 @@ def colorPicker_5050():
     try: fitaLed(color[0][0],color[0][1],color[0][2])
     except: print ("LEDs 5050 (não endereçáveis) não foi adicionado")
 
+def mostrarTxtFuncao(x):
+    if cmbEffects.current() == 3:
+        lblFuncao1.config(text = "Tamanho:")
+        lblFuncao1.grid()
+        txtFuncao1.grid()
+
+    elif cmbEffects.current() == 4:
+        lblFuncao1.config(text = "Duração:")
+        lblFuncao1.grid()
+        txtFuncao1.grid()
+
+    elif cmbEffects.current() == 6:
+        lblFuncao1.config(text = "Duração:")
+        lblFuncao1.grid()
+        txtFuncao1.grid()
+
+    else:
+        lblFuncao1.grid_remove()
+        txtFuncao1.grid_remove()
+
 def reiniciar_app(event=0):
     """Restarts the current program.
     Note: this function does not return. Any cleanup action (like
@@ -233,10 +299,10 @@ menu.add_cascade(label='Efeitos', menu=sel_menu)
 
 if len(erros) > 0: menu.add_cascade(label='Erros', command=janelaErros)
 
-frameWindow = Frame(window, relief=RAISED)
+frameWindow = Frame(window, relief=GROOVE)
 frameWindow.grid(column=0,row=0)
 
-frameCor = Frame(frameWindow, relief=RAISED, padx=10, pady=10, borderwidth=2)
+frameCor = Frame(frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=2)
 frameCor.grid(column=0,row=0,sticky=W+E+N+S)
 
 svR = StringVar()
@@ -265,7 +331,7 @@ lblCores = Label(frameCor, text='Amostra de cores', bg="red")
 lblCores.grid(column=2, row=0, rowspan=3, sticky=W+E+N+S)
 Button(frameCor, text='Color Picker',command=colorPicker_w2812b).grid(column=0, row=3,columnspan=3, sticky=W+E)
 
-framePonto = Frame(frameWindow, relief=RAISED, padx=10, pady=10, borderwidth=2)
+framePonto = Frame(frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=2)
 framePonto.grid(column=1,row=0,sticky=W+E+N+S)
 
 Label(framePonto, text="Ponto A:").grid(column=0, row=0)
@@ -274,15 +340,22 @@ svPA.trace("w", lambda *args: character_limit(txtPontoA,3))
 txtPontoA = Entry(framePonto,width=5,textvariable=svPA)
 txtPontoA.grid(column=1, row=0,sticky=W)
 
-Label(framePonto, text="Ponto B:").grid(column=2, row=0)
+Label(framePonto, text="Ponto B:").grid(column=2, row=0,sticky=E)
 svPB = StringVar()
 svPB.trace("w", lambda *args: character_limit(txtPontoB,3))
 txtPontoB = Entry(framePonto,width=5,textvariable=svPB)
-txtPontoB.grid(column=3, row=0)
+txtPontoB.grid(column=3, row=0,sticky=E)
 
 Label(framePonto, text="Vel:").grid(column=0, row=1,sticky=E)
 txtVel = Entry(framePonto,width=5)
 txtVel.grid(column=1, row=1,sticky=W)
+
+lblFuncao1 = Label(framePonto, text="Função 1:")
+lblFuncao1.grid(column=2, row=1,sticky=E)
+lblFuncao1.grid_remove()
+txtFuncao1 = Entry(framePonto,width=5)
+txtFuncao1.grid(column=3, row=1,sticky=E)
+txtFuncao1.grid_remove()
 
 lblEffects = Label(framePonto, text="Efeitos:")
 lblEffects.grid(column=0,row=2,pady=10)
@@ -300,9 +373,15 @@ cmbEffects['values']= ("0 - Ligar",
 	"9 - Teste")
 cmbEffects.current(0) #set the selected item
 cmbEffects.grid(column=1, row=2,columnspan=3)
-#cmbEffects.bind("<<ComboboxSelected>>", mostrarTxtFuncao)
+cmbEffects.bind("<<ComboboxSelected>>", mostrarTxtFuncao)
 
-frameBotaoTocar = Frame(frameWindow, relief=RAISED, padx=10, pady=10, borderwidth=1)
+v = IntVar()
+outrosEfeitos = [("ArcoIris",1)]
+for val, outroEfeito in enumerate(outrosEfeitos):
+    Radiobutton(framePonto,text=outroEfeito,indicatoron = 0,variable=v,value=val).grid(column=val,row=3)
+# btnArcoIris = Button(framePonto,text='Arco Íris')
+
+frameBotaoTocar = Frame(frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=1)
 frameBotaoTocar.grid(column=0,row=1,columnspan=2,sticky=W+E)
 
 Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=testLED).grid(column=0,row=0)
@@ -311,4 +390,7 @@ window.config(menu=menu)
 window.title("Sway LED")
 window.bind_all("<F9>",reiniciar_app)
 window.bind_all("<Return>",testLED)
+
+try: window.iconbitmap("swayled.ico")
+except: print(sys.exc_info())
 window.mainloop()
