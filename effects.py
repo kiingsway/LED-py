@@ -1,4 +1,5 @@
 import time
+import globals
 import threading
 from decimal import *
 from neopixel import *
@@ -124,10 +125,14 @@ def wheel(pos):
         return Color(0, pos * 3, 255 - pos * 3)
 
     
-def rainbowCycle(strip, wait_ms=20, iterations=5):
+def rainbowCycle(wait_ms=20, iterations=1):
     """Draw rainbow that uniformly distributes itself across all pixels."""
     for j in range(256*iterations):
+        if not globals.outroEfeitoRainbow:
+            off()
+            break
         for i in range(strip.numPixels()):
             strip.setPixelColor(i, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
         strip.show()
         time.sleep(wait_ms/1000.0)
+        

@@ -249,6 +249,8 @@ def validateFields():
 def testLED(event=0):
     if not validateFields(): return
 
+    globals.outroEfeitoRainbow = False
+
     pontoA = int(txtPontoA.get())
     if txtPontoB.get() == '': pontoB = pontoA
     else: pontoB = int(txtPontoB.get())
@@ -294,6 +296,18 @@ def testLED(event=0):
     if cmbEffects.current() == 9:
         testThread = threading.Thread(target=megaman,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
         testThread.start()
+
+def outros_efeitos():
+    efeito = v.get()
+    print(efeito)
+    if efeito == "0":
+        print("Desliguei o rainbowCycle")
+        globals.outroEfeitoRainbow = False
+    if efeito == "1":
+        print("Tentando entrar no rainbowCycle")
+        outroEfeitoThread = threading.Thread(target=rainbowCycle)
+        globals.outroEfeitoRainbow = True
+        outroEfeitoThread.start()
 
 def desligar():
     try: off()
@@ -359,6 +373,8 @@ def reiniciar_app(event=0):
     Note: this function does not return. Any cleanup action (like
     saving data) must be done before calling this function."""
     python = sys.executable
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("App reiniciado")
     os.execl(python, python, * sys.argv)
 
 window = Tk()
@@ -459,10 +475,10 @@ cmbEffects.current(0) #set the selected item
 cmbEffects.grid(column=1, row=2,columnspan=3)
 cmbEffects.bind("<<ComboboxSelected>>", mostrarTxtFuncao)
 
-v = IntVar()
-outrosEfeitos = [("ArcoIris",1)]
-for val, outroEfeito in enumerate(outrosEfeitos):
-    Radiobutton(framePonto,text=outroEfeito,indicatoron = 0,variable=v,value=val).grid(column=val,row=3)
+v = StringVar()
+outrosEfeitos = [("Desligado","0"),("ArcoIris","1")]
+for outroEfeito, val in outrosEfeitos:
+    Radiobutton(framePonto,text=outroEfeito,indicatoron = 0,variable=v,value=val,relief=FLAT,command=outros_efeitos).grid(column=val,row=3)
 # btnArcoIris = Button(framePonto,text='Arco Íris')
 
 frameBotaoTocar = Frame(frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=1)
