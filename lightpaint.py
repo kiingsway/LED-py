@@ -7,9 +7,11 @@
 # Based on https://github.com/scottjgibson/PixelPi
 
 import time
+import globals
 try: from neopixel import *
 except:
-    def Color(r,g,b): print("R: %x    G: %x    B: %x")
+    def Color(r,g,b): pass
+    # def Color(r,g,b): print("R: %x    G: %x    B: %x", (r,g,b),end='\r')
 import argparse
 
 # Lightpainting
@@ -33,16 +35,17 @@ try:
 except:
     print('Estamos sem LEDs :(')
 
-def lightpainting(img,frame_rate):
+def lightpainting():
 
-    print(img.size[0])
-    print(img.size[1])
+    img = globals.imagem_arquivo
+
+    print("Tamanho: {}x{}".format(img.size[0],img.size[1]))
 
     # Check that the height of the image is greater than or equal the number of LEDs on the strip
     if(img.size[1] < LED_COUNT):
         raise Exception("Image height is smaller than led strip size. Required height = {}".format(LED_COUNT))
     elif(img.size[1] > LED_COUNT):
-        print ("Resizing image")
+        print ("Redimensionando a imagem...")
         new_width  = LED_COUNT * img.size[0] / img.size[1]
         img = img.resize((int(new_width), LED_COUNT), Image.ANTIALIAS)
 
@@ -59,6 +62,11 @@ def lightpainting(img,frame_rate):
             column[x][y] = Color(value[1], value[0], value[2])
 
     while True:
+        frame_rate = globals.taxa_frame
+        column_rate = globals.taxa_coluna
+        reverse_x = globals.reverter_x
+        reverse_y = globals.reverter_y
+        print("LP rodando - frame_rate: {} | column_rate: {} | reverse_x: {} | reverse_y: {}".format(frame_rate, column_rate, reverse_x, reverse_y))
         # Wait for button to be pressed before displaying image
         #if not loop:
             #print("Waiting for button to be pressed")
@@ -66,12 +74,14 @@ def lightpainting(img,frame_rate):
             #time.sleep(0.5)
 
         x_range = range(image_width)
-        # if reverse_x:
-            # x_range.reverse()
+        if reverse_x:
+            try: x_range.reverse()
+            except: pass
 
         y_range = range(LED_COUNT)
-        # if reverse_y:
-            # y_range.reverse()
+        if reverse_y:
+            try: y_range.reverse()
+            except: pass
 
         for x in x_range:
             led_pos = 0
@@ -81,9 +91,12 @@ def lightpainting(img,frame_rate):
                 led_pos += 1
             try: strip.show()
             except: pass
-            #time.sleep(column_rate / 1000.0)
-            time.sleep(0.01)
-
+            time.sleep(column_rate / 1000.0)
+            # time.sleep(0.01)
+            
         # Wait for `frame_rate` ms before drawing a new frame
         time.sleep(frame_rate / 1000.0)
 
+        if not globals.lpLigado:
+            print("Parando lightpainting...")
+            break

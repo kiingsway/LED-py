@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import random
+import globals
 import argparse
 import threading
 from decimal import *
@@ -27,13 +28,13 @@ except ImportError: import tkinter.ttk as ttk
 except Exception: addErros((str(sys.exc_info()[0])+': ttk está instalado?'),'from Tkinter import *',sys.exc_info()[1])
 
 try: import tkMessageBox
-except ImportError: import tkinter.messagebox
+except ImportError: import tkinter.messagebox as tkMessageBox
 
 try: from tkColorChooser import askcolor
 except ImportError: from tkinter.colorchooser import askcolor
 
 try: import tkFileDialog
-except ImportError: import tkinter.filedialog
+except ImportError: import tkinter.filedialog as tkFileDialog
 except: addErros("tkinter instalado?","try: import tkFileDialog",sys.exc_info()[1])
 
 try: from effects import *
@@ -69,13 +70,42 @@ def autoscroll(sbar, first, last):
 
 
 def janelaLightpaint():
-    tam_base = 500
+    tam_base = 300
 
     janelaParaLightpaint = Toplevel(window)
     janelaParaLightpaint.title('Lightpaint')
+    # janelaParaLightpaint.geometry('900x400')
 
-    frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=GROOVE)
-    frame_imagepicker.grid(column=0,row=0,sticky=W+E+N+S)     
+
+
+    def frame_maismenos(aumentar):
+        if aumentar:
+            if globals.taxa_frame < 1000:
+                globals.taxa_frame += 100
+                lblFrame.delete(0,END)
+                lblFrame.insert(0,globals.taxa_frame)
+        else:
+            if globals.taxa_frame > 100:
+                globals.taxa_frame -= 100
+                lblFrame.delete(0,END)
+                lblFrame.insert(0,globals.taxa_frame)
+
+
+    def coluna_maismenos(aumentar):
+        if aumentar:
+            if globals.taxa_coluna < 10:
+                globals.taxa_coluna += 1
+                lblColuna.delete(0,END)
+                lblColuna.insert(0,globals.taxa_coluna)
+        else:
+            if globals.taxa_coluna > 1:
+                globals.taxa_coluna -= 1
+                lblColuna.delete(0,END)
+                lblColuna.insert(0,globals.taxa_coluna)
+
+    def trocar_velocidade():
+        globals.taxa_frame = int(lblFrame.get())
+        globals.taxa_coluna = int(lblColuna.get())
 
     def abrir_imagem():
         def miniatura(img_mini):
@@ -91,33 +121,88 @@ def janelaLightpaint():
                 img_mini = img_mini.resize((int(nova_alt),int(nova_lar)), Image.ANTIALIAS)
             return img_mini
 
-        try: arquivoImagem = tkinter.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
-        except AttributeError: arquivoImagem = tkFileDialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
+        local_arquivo = tkFileDialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
         txtImagem.delete(0,END)
-        txtImagem.insert(0,arquivoImagem.split('/')[-1])
-        imagem_miniatura = Image.open(arquivoImagem).convert("RGB")
-        imgTk = ImageTk.PhotoImage(miniatura(imagem_miniatura))
-        lblImagem.config(image=imgTk)
-        lblImagem.image = imgTk
-        lightpaintingThread = threading.Thread(target=lp,args=(imagem_miniatura,100,))
-        lightpaintingThread.start()
+        txtImagem.insert(0,local_arquivo.split('/')[-1])
+        try:
+            globals.imagem_arquivo = Image.open(local_arquivo).convert("RGB")
+            imgTk = ImageTk.PhotoImage(miniatura(globals.imagem_arquivo))
+            lblImagem.config(image=imgTk)
+            lblImagem.image = imgTk
+            lightpaintingThread = threading.Thread(target=lp)
+            lightpaintingThread.start()
+            globals.lpLigado = True
+        except AttributeError: print('Upload da imagem cancelado')
 
-    txtImagem = Entry(frame_imagepicker)
+    def play_pausePainting():
+        if globals.lpLigado:
+            lp.parar_painting = True
+            btnPl.config(text='Tocar')
+            globals.lpLigado = False
+        else:
+            lightpaintingThread = threading.Thread(target=lp)
+            lightpaintingThread.start()
+            btnPl.config(text='Pausar')
+            globals.lpLigado = True
+
+    def reverter(alvo):
+        if alvo == 'x':
+            if ckb1.get() == 1:
+                globals.reverter_x = True
+            else:
+                globals.reverter_x = False
+        if alvo == 'y':
+            if ckb2.get() == 1:
+                globals.reverter_y = True
+            else:
+                globals.reverter_y = False
+
+
+    frame_campos1 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
+    frame_campos1.grid(column=0,row=0)
+
+    txtImagem = Entry(frame_campos1,width=40)
     txtImagem.grid(column=0,row=0)
-    Button(frame_imagepicker,text='Escolher imagem...',command=abrir_imagem).grid(column=1,row=0)
+    Button(frame_campos1,text='Escolher imagem...',command=abrir_imagem).grid(column=1,row=0)
+    btnPl = Button(frame_campos1,text='Pausar',command= lambda: play_pausePainting())
+    btnPl.grid(column=2,row=0)
 
+    frame_campos2 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
+    frame_campos2.grid(column=0,row=1)
+
+    Label(frame_campos2,text='Taxa Frame:').grid(column=0,row=0)
+    Button(frame_campos2,text='-',command=lambda:frame_maismenos(False)).grid(column=1,row=0)
+    lblFrame = Entry(frame_campos2,width=5)
+    lblFrame.insert(0,globals.taxa_frame)
+    lblFrame.grid(column=2,row=0)
+    Button(frame_campos2,text='+',command=lambda:frame_maismenos(True)).grid(column=3,row=0)
+    Button(frame_campos2,text='Trocar velocidade',command=trocar_velocidade).grid(column=4,row=0)
+
+    frame_campos3 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
+    frame_campos3.grid(column=0,row=2)
+
+    Label(frame_campos3,text='Taxa Coluna:').grid(column=0,row=0)
+    Button(frame_campos3,text='-',command=lambda:coluna_maismenos(False)).grid(column=1,row=0)
+    lblColuna = Entry(frame_campos3,width=5)
+    lblColuna.insert(0,globals.taxa_coluna)
+    lblColuna.grid(column=2,row=0)
+    Button(frame_campos3,text='+',command=lambda:coluna_maismenos(True)).grid(column=3,row=0)
+    Button(frame_campos3,text='Trocar velocidade',command=trocar_velocidade).grid(column=4,row=0)
+
+    frame_campos4 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
+    frame_campos4.grid(column=0,row=3)
+
+    ckb1 = IntVar()
+    ckb2 = IntVar()
+    Checkbutton(frame_campos4, text='Reverter X', variable=ckb1, command=lambda:reverter('x') ).grid(row=0,column=0)
+    Checkbutton(frame_campos4, text='Reverter Y', variable=ckb2, command=lambda:reverter('y') ).grid(row=0,column=1)
+
+    frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED,bd=5)
+    frame_imagepicker.grid(column=1,row=0,rowspan=4)
 
     lblImagem = Label(frame_imagepicker, width=tam_base,height=tam_base)
+    lblImagem.grid(column=1,row=0)
     abrir_imagem()
-    lblImagem.grid(column=0,row=1,columnspan=4)
-
-    frame_velocidade = Frame(janelaParaLightpaint,padx=10, pady=10,relief=GROOVE)
-    frame_velocidade.grid(column=1,row=0,sticky=W+E+N+S)
-
-    Button(frame_velocidade,text='-').grid(column=0,row=1,sticky=W)
-    txtVelocidade = Entry(frame_velocidade)
-    txtVelocidade.grid(column=1,row=1,sticky=W)
-    Button(frame_velocidade,text='+').grid(column=2,row=1,sticky=W)
 
 def janelaErros():
 
@@ -157,8 +242,7 @@ def janelaErros():
 
 def validateFields():
     if txtPontoA.get() == '':
-        try: tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
-        except NameError: tkinter.messagebox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
+        tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
         return False
     return True
 
