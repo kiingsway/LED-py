@@ -14,3 +14,7 @@ reverter_x = False
 reverter_y = False
 
 outroEfeitoRainbow = False
+
+r = {}
+
+canvas = ''

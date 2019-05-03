@@ -2,7 +2,9 @@ import time
 import globals
 import threading
 from decimal import *
-from neopixel import *
+try: from neopixel import *
+except: from ledsDemo import *
+
 from random import randint
 
 BPM = 128
@@ -19,6 +21,7 @@ LED_INVERT     = False   # True to invert the signal (when using NPN transistor 
 LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 #LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
 
+
 # Create NeoPixel object with appropriate configuration.
 strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
 # Intialize the library (must be called once before other functions).
@@ -26,7 +29,7 @@ strip.begin()
 
 def off(event=0):
     for i in range(LED_COUNT):
-        strip. setPixelColor(i, Color(0,0,0))
+        strip.setPixelColor(i, Color(0,0,0))
     strip.show()
 
 
@@ -127,11 +130,15 @@ def wheel(pos):
     
 def rainbowCycle(wait_ms=20, iterations=1):
     """Draw rainbow that uniformly distributes itself across all pixels."""
+    print('entrei no rainbow')
+    print(strip.numPixels())
+    print
     for j in range(256*iterations):
         if not globals.outroEfeitoRainbow:
             off()
             break
         for i in range(strip.numPixels()):
+            print('entrei naquele for')
             strip.setPixelColor(i, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
         strip.show()
         time.sleep(wait_ms/1000.0)
