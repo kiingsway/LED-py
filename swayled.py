@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 
+print("Importando bibliotecas comuns...")
 import os
 import sys
 import time
@@ -8,6 +10,7 @@ import random
 import globals
 import argparse
 import threading
+import platform
 from decimal import *
 from itertools import product
 from functools import partial
@@ -18,10 +21,7 @@ def addErros(classe,codigo,erro):
 	erros.append(dict(tituloErro=classe,
     codigoProblematico=codigo,
     erroPython=erro))
-
-# Lightpainting
-try: from PIL import ImageTk, Image
-except: print('Sem bibliotecas de imagem. Instale-as com: pip install Pillow')
+print("Importando bibliotecas dos LEDs...")
 
 try: from Tkinter import *
 except ImportError: from tkinter import *
@@ -59,6 +59,11 @@ except ModuleNotFoundError: addErros('ModuleNotFoundError: Um módulo não foi e
 except ImportError: addErros('ImportError: O arquivo led5050.py está na pasta do código?','try: from led5050 import *',sys.exc_info()[1])
 except Exception: addErros(sys.exc_info()[0],'from Tkinter import *',sys.exc_info()[1])
 
+# Lightpainting
+try: from PIL import ImageTk, Image
+except: print('Sem bibliotecas de imagem. Instale-as com: pip install Pillow')
+
+print('Carregando funções...')
 
 def autoscroll(sbar, first, last):
     """Hide and show scrollbar as needed."""
@@ -70,16 +75,16 @@ def autoscroll(sbar, first, last):
     sbar.set(first, last)
 
 def janelaLedDemo():
-	janelaParaLedDemo = Toplevel(window)
-	janelaParaLedDemo.title('LEDs DEMO')
-	janelaParaLedDemo.geometry('1850x100')
+    janelaParaLedDemo = Toplevel(window)
+    janelaParaLedDemo.title('LEDs DEMO')
+    janelaParaLedDemo.geometry('1850x100')
 
-	globals.canvas = Canvas(janelaParaLedDemo)
+    globals.canvas = Canvas(janelaParaLedDemo)
 
-	for led in range(120):
-		base = 15*led
-		globals.r["retangulo{0}".format(led)] = globals.canvas.create_rectangle(5+base, 10, 15+base, 20,outline="#000", fill="#000")
-	globals.canvas.pack(fill=BOTH,expand=1)
+    for led in range(120):
+    	base = 15*led
+    	globals.r["retangulo{0}".format(led)] = globals.canvas.create_rectangle(5+base, 10, 15+base, 20,outline="#000", fill="#000")
+    globals.canvas.pack(fill=BOTH,expand=1)
 
 
 def janelaLightpaint():
@@ -134,18 +139,19 @@ def janelaLightpaint():
                 img_mini = img_mini.resize((int(nova_alt),int(nova_lar)), Image.ANTIALIAS)
             return img_mini
 
-        local_arquivo = tkFileDialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
+        if platform.system() == "Windows": local_arquivo = tkFileDialog.askopenfilename(initialdir = "Z:\\Projetos\\LED-py\\Images",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
+        else: local_arquivo = tkFileDialog.askopenfilename(initialdir = "/home/pi/Projetos/LED-py/Images",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
         txtImagem.delete(0,END)
         txtImagem.insert(0,local_arquivo.split('/')[-1])
-        try:
-            globals.imagem_arquivo = Image.open(local_arquivo).convert("RGB")
-            imgTk = ImageTk.PhotoImage(miniatura(globals.imagem_arquivo))
-            lblImagem.config(image=imgTk)
-            lblImagem.image = imgTk
-            lightpaintingThread = threading.Thread(target=lp)
-            lightpaintingThread.start()
-            globals.lpLigado = True
-        except AttributeError: print('Upload da imagem cancelado')
+        # try:
+        globals.imagem_arquivo = Image.open(local_arquivo).convert("RGB")
+        imgTk = ImageTk.PhotoImage(miniatura(globals.imagem_arquivo))
+        lblImagem.config(image=imgTk)
+        lblImagem.image = imgTk
+        lightpaintingThread = threading.Thread(target=lp)
+        lightpaintingThread.start()
+        globals.lpLigado = True
+        # except AttributeError: print('Upload da imagem cancelado')
 
     def play_pausePainting():
         if globals.lpLigado:
@@ -393,17 +399,23 @@ def reiniciar_app(event=0):
     os.execl(python, python, * sys.argv)
 
 window = Tk()
+try: window.iconbitmap("swayled.ico")
+except: addErros('_tkinter.TclError','window.iconbitmap("swayled.ico")',sys.exc_info()[1])
 
 def character_limit(entry_text, limit_char):
     if len(entry_text.get()) > limit_char:
         entry_text.delete(limit_char,END)
 
+print('Carregando programa...')
+
 menu = Menu(window)
 sel_menu = Menu(menu,tearoff=False)
+sel_menu.add_command(label='LEDs Demo', command=janelaLedDemo)
 sel_menu.add_command(label='Pegar RGB 5050',command=colorPicker_5050)
 sel_menu.add_separator()
 sel_menu.add_command(label='Desligar LEDs',command=desligar)
 sel_menu.add_separator()
+if len(erros) > 0: sel_menu.add_command(label='Erros', command=janelaErros)
 sel_menu.add_command(label='Resetar App',command=reiniciar_app,accelerator="F9")
 sel_menu.add_command(label='Sobre')
 menu.add_cascade(label='Arquivo', menu=sel_menu)
@@ -412,9 +424,7 @@ sel_menu = Menu(menu,tearoff=False)
 sel_menu.add_command(label='LightPaint',command=janelaLightpaint)
 menu.add_cascade(label='Efeitos', menu=sel_menu)
 
-menu.add_cascade(label='LEDs Demo', command=janelaLedDemo)
 
-if len(erros) > 0: menu.add_cascade(label='Erros', command=janelaErros)
 
 frameWindow = Frame(window, relief=GROOVE)
 frameWindow.grid(column=0,row=0)
@@ -506,7 +516,4 @@ window.config(menu=menu)
 window.title("Sway LED")
 window.bind_all("<F9>",reiniciar_app)
 window.bind_all("<Return>",testLED)
-
-try: window.iconbitmap("swayled.ico")
-except: print(sys.exc_info())
 window.mainloop()
