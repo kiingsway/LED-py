@@ -26,7 +26,7 @@ strip.begin()
 
 def off(event=0):
     for i in range(LED_COUNT):
-        strip. setPixelColor(i, Color(0,0,0))
+        strip.setPixelColor(i, Color(0,0,0))
     strip.show()
 
 
