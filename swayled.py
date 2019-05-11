@@ -398,9 +398,7 @@ def reiniciar_app(event=0):
     print("App reiniciado")
     os.execl(python, python, * sys.argv)
 
-window = Tk()
-try: window.iconbitmap("swayled.ico")
-except: addErros('_tkinter.TclError','window.iconbitmap("swayled.ico")',sys.exc_info()[1])
+
 
 def character_limit(entry_text, limit_char):
     if len(entry_text.get()) > limit_char:
@@ -517,3 +515,12 @@ window.title("Sway LED")
 window.bind_all("<F9>",reiniciar_app)
 window.bind_all("<Return>",testLED)
 window.mainloop()
+
+if __name__ == "__main__":
+    window = Tk()
+    try:
+        window.iconbitmap("swayled.ico")
+    except:
+        addErros('_tkinter.TclError','window.iconbitmap("swayled.ico")',sys.exc_info()[1])
+    window.mainloop()
+
