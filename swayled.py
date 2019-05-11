@@ -74,18 +74,6 @@ def autoscroll(sbar, first, last):
         sbar.grid()
     sbar.set(first, last)
 
-def janelaLedDemo():
-    janelaParaLedDemo = Toplevel(window)
-    janelaParaLedDemo.title('LEDs DEMO')
-    janelaParaLedDemo.geometry('1850x100')
-
-    globals.canvas = Canvas(janelaParaLedDemo)
-
-    for led in range(120):
-    	base = 15*led
-    	globals.r["retangulo{0}".format(led)] = globals.canvas.create_rectangle(5+base, 10, 15+base, 20,outline="#000", fill="#000")
-    globals.canvas.pack(fill=BOTH,expand=1)
-
 
 def janelaLightpaint():
     tam_base = 300
@@ -143,15 +131,15 @@ def janelaLightpaint():
         else: local_arquivo = tkFileDialog.askopenfilename(initialdir = "/home/pi/Projetos/LED-py/Images",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
         txtImagem.delete(0,END)
         txtImagem.insert(0,local_arquivo.split('/')[-1])
-        # try:
-        globals.imagem_arquivo = Image.open(local_arquivo).convert("RGB")
-        imgTk = ImageTk.PhotoImage(miniatura(globals.imagem_arquivo))
-        lblImagem.config(image=imgTk)
-        lblImagem.image = imgTk
-        lightpaintingThread = threading.Thread(target=lp)
-        lightpaintingThread.start()
-        globals.lpLigado = True
-        # except AttributeError: print('Upload da imagem cancelado')
+        try:
+            globals.imagem_arquivo = Image.open(local_arquivo).convert("RGB")
+            imgTk = ImageTk.PhotoImage(miniatura(globals.imagem_arquivo))
+            lblImagem.config(image=imgTk)
+            lblImagem.image = imgTk
+            lightpaintingThread = threading.Thread(target=lp)
+            lightpaintingThread.start()
+            globals.lpLigado = True
+        except AttributeError: print('Upload da imagem cancelado')
 
     def play_pausePainting():
         if globals.lpLigado:
@@ -410,7 +398,6 @@ print('Carregando programa...')
 
 menu = Menu(window)
 sel_menu = Menu(menu,tearoff=False)
-sel_menu.add_command(label='LEDs Demo', command=janelaLedDemo)
 sel_menu.add_command(label='Pegar RGB 5050',command=colorPicker_5050)
 sel_menu.add_separator()
 sel_menu.add_command(label='Desligar LEDs',command=desligar)
