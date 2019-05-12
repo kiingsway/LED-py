@@ -213,41 +213,7 @@ def janelaLightpaint():
     lblImagem.grid(column=1,row=0)
     abrir_imagem()
 
-def janelaErros():
 
-    janelaParaErros = Toplevel(window)
-    janelaParaErros.title("Erros Sway LED")
-    
-    #   Barras horizontais
-    vsb = ttk.Scrollbar(orient="vertical")
-    hsb = ttk.Scrollbar(orient="horizontal")
-
-    #   Objeto Treeview
-    tree = ttk.Treeview(janelaParaErros, columns=("codigoProblematico","erroPython"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
-    xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
-
-    #   Barras de scroll às vistas x e y do objeto Treeview
-    vsb['command'] = tree.yview
-    hsb['command'] = tree.xview
-
-    #   Cabeçalhos das diferentes colunas
-    tree.heading("#0", text="Erro", anchor='w')
-    tree.heading("codigoProblematico", text="Parte do código", anchor='w')
-    tree.heading("erroPython", text="Erro Python", anchor='w')
-    tree.column("#0", stretch=0, width=500)
-    tree.column("codigoProblematico", stretch=0, width=200)
-    tree.column("erroPython", stretch=0, width=200)
-
-    #   Inserção na treeview
-    for i in range(len(erros)):
-    	tree.insert('', 'end', text=erros[i]["tituloErro"], values=[erros[i]["codigoProblematico"], erros[i]["erroPython"]])
-
-    # Arrange the tree and its scrollbars in the toplevel
-    tree.grid(column=0, row=0, sticky='nswe')
-    vsb.grid(column=1, row=0, sticky='ns')
-    hsb.grid(column=0, row=1, sticky='ew')
-    janelaParaErros.grid_columnconfigure(0, weight=1)
-    janelaParaErros.grid_rowconfigure(0, weight=1)
 
 def validateFields():
     if txtPontoA.get() == '':
@@ -377,14 +343,7 @@ def mostrarTxtFuncao(x):
         lblFuncao1.grid_remove()
         txtFuncao1.grid_remove()
 
-def reiniciar_app(event=0):
-    """Restarts the current program.
-    Note: this function does not return. Any cleanup action (like
-    saving data) must be done before calling this function."""
-    python = sys.executable
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print("App reiniciado")
-    os.execl(python, python, * sys.argv)
+
 
 
 
@@ -394,6 +353,50 @@ def character_limit(entry_text, limit_char):
 
 print('Carregando programa...')
 
+    
+
+class JanelaErros(Toplevel):
+    """ Class que define a janela de erros """
+
+    def __init__(self, original):
+        """ Constrói toda a janela de erros """
+        self.janela_original = original
+        Toplevel.__init__(self)
+        self.title("Erros SwayLED")
+        self.construir_janela()
+
+    def construir_janela(self):
+        #   Barras horizontais
+        vsb = ttk.Scrollbar(orient="vertical")
+        hsb = ttk.Scrollbar(orient="horizontal")
+
+        #   Objeto Treeview
+        tree = ttk.Treeview(self, columns=("codigoProblematico","erroPython"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
+        xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
+
+        #   Barras de scroll às vistas x e y do objeto Treeview
+        vsb['command'] = tree.yview
+        hsb['command'] = tree.xview
+
+        #   Cabeçalhos das colunas
+        tree.heading("#0", text="Erro", anchor='w')
+        tree.heading("codigoProblematico", text="Parte do código", anchor='w')
+        tree.heading("erroPython", text="Erro Python", anchor='w')
+        tree.column("#0", stretch=0, width=500)
+        tree.column("codigoProblematico", stretch=0, width=200)
+        tree.column("erroPython", stretch=0, width=200)
+
+        #   Inserção na treeview
+        for i in range(len(erros)):
+            tree.insert('', 'end', text=erros[i]["tituloErro"], values=[erros[i]["codigoProblematico"], erros[i]["erroPython"]])
+
+        # Arrange the tree and its scrollbars in the toplevel
+        tree.grid(column=0, row=0, sticky='nswe')
+        vsb.grid(column=1, row=0, sticky='ns')
+        hsb.grid(column=0, row=1, sticky='ew')
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
 class SwayLEDapp(object):
     """Classe que define a janela principal do programa"""
 
@@ -401,7 +404,7 @@ class SwayLEDapp(object):
         """ Constrói toda a janela principal """
         self.window = parent
         self.window.title("Sway LED")
-        self.window.bind_all("<F9>",reiniciar_app)
+        self.window.bind_all("<F9>",self.reiniciar_app)
         self.window.bind_all("<Return>",testLED)
         self.frameWindow = Frame(window, relief=GROOVE)
         self.frameWindow.grid(column=0,row=0)
@@ -420,8 +423,8 @@ class SwayLEDapp(object):
         sel_menu.add_separator()
         sel_menu.add_command(label='Desligar LEDs',command=desligar)
         sel_menu.add_separator()
-        if len(erros) > 0: sel_menu.add_command(label='Erros', command=janelaErros)
-        sel_menu.add_command(label='Resetar App',command=reiniciar_app,accelerator="F9")
+        if len(erros) > 0: sel_menu.add_command(label='Erros', command=self.abrir_janela_erros)
+        sel_menu.add_command(label='Resetar App',command=self.reiniciar_app,accelerator="F9")
         sel_menu.add_command(label='Sobre')
         self.menu.add_cascade(label='Arquivo', menu=sel_menu)
 
@@ -524,6 +527,18 @@ class SwayLEDapp(object):
         outrosEfeitos = [("Desligado","0"),("ArcoIris","1")]
         for outroEfeito, val in outrosEfeitos:
             Radiobutton(framePonto,text=outroEfeito,indicatoron = 0,variable=rdbtn,value=val,relief=FLAT,command=outros_efeitos).grid(column=val,row=3)
+
+    def abrir_janela_erros(self):
+        outra_janela = JanelaErros(self)
+
+    def reiniciar_app(self, event=0):
+        """Restarts the current program.
+        Note: this function does not return. Any cleanup action (like
+        saving data) must be done before calling this function."""
+        python = sys.executable
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("App reiniciado")
+        os.execl(python, python, * sys.argv)
 
 
 if __name__ == "__main__":
