@@ -74,18 +74,6 @@ def autoscroll(sbar, first, last):
         sbar.grid()
     sbar.set(first, last)
 
-def janelaLedDemo():
-    janelaParaLedDemo = Toplevel(window)
-    janelaParaLedDemo.title('LEDs DEMO')
-    janelaParaLedDemo.geometry('1850x100')
-
-    globals.canvas = Canvas(janelaParaLedDemo)
-
-    for led in range(120):
-    	base = 15*led
-    	globals.r["retangulo{0}".format(led)] = globals.canvas.create_rectangle(5+base, 10, 15+base, 20,outline="#000", fill="#000")
-    globals.canvas.pack(fill=BOTH,expand=1)
-
 
 def janelaLightpaint():
     tam_base = 300
@@ -406,115 +394,137 @@ def character_limit(entry_text, limit_char):
 
 print('Carregando programa...')
 
-menu = Menu(window)
-sel_menu = Menu(menu,tearoff=False)
-sel_menu.add_command(label='LEDs Demo', command=janelaLedDemo)
-sel_menu.add_command(label='Pegar RGB 5050',command=colorPicker_5050)
-sel_menu.add_separator()
-sel_menu.add_command(label='Desligar LEDs',command=desligar)
-sel_menu.add_separator()
-if len(erros) > 0: sel_menu.add_command(label='Erros', command=janelaErros)
-sel_menu.add_command(label='Resetar App',command=reiniciar_app,accelerator="F9")
-sel_menu.add_command(label='Sobre')
-menu.add_cascade(label='Arquivo', menu=sel_menu)
+class SwayLEDapp(object):
+    """Classe que define a janela principal do programa"""
 
-sel_menu = Menu(menu,tearoff=False)
-sel_menu.add_command(label='LightPaint',command=janelaLightpaint)
-menu.add_cascade(label='Efeitos', menu=sel_menu)
+    def __init__(self, parent):
+        """ Constrói toda a janela principal """
+        self.window = parent
+        self.window.title("Sway LED")
+        self.window.bind_all("<F9>",reiniciar_app)
+        self.window.bind_all("<Return>",testLED)
+        self.frameWindow = Frame(window, relief=GROOVE)
+        self.frameWindow.grid(column=0,row=0)
+        self.construir_menu()
+        self.construir_frame_cores()
+        self.construir_frame_pontos()
+        frameBotaoTocar = Frame(self.frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=0)
+        frameBotaoTocar.grid(column=0,row=1,columnspan=2,sticky=W+E)
+        Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=testLED).grid(column=0,row=0)
+
+    def construir_menu(self):
+        """ Constrói o menu da janela principal """
+        self.menu = Menu(self.window)
+        sel_menu = Menu(self.menu,tearoff=False)
+        sel_menu.add_command(label='Pegar RGB 5050',command=colorPicker_5050)
+        sel_menu.add_separator()
+        sel_menu.add_command(label='Desligar LEDs',command=desligar)
+        sel_menu.add_separator()
+        if len(erros) > 0: sel_menu.add_command(label='Erros', command=janelaErros)
+        sel_menu.add_command(label='Resetar App',command=reiniciar_app,accelerator="F9")
+        sel_menu.add_command(label='Sobre')
+        self.menu.add_cascade(label='Arquivo', menu=sel_menu)
+
+        sel_menu = Menu(self.menu,tearoff=False)
+        sel_menu.add_command(label='LightPaint',command=janelaLightpaint)
+        self.menu.add_cascade(label='Efeitos', menu=sel_menu)
+        self.window.config(menu=self.menu)
+
+    def construir_frame_cores(self):
+        """ Constrói o quadro que define as cores dos LEDs """
+        frameCor = Frame(self.frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=2)
+        frameCor.grid(column=0,row=0,sticky=W+E+N+S)
+
+        svR = StringVar()
+        svG = StringVar()
+        svB = StringVar()
+
+        lblR = Label(frameCor, text="R:")
+        txtR = Entry(frameCor,width=5,textvariable=svR)
+        lblG = Label(frameCor, text="G:")
+        txtG = Entry(frameCor,width=5,textvariable=svG)
+        lblB = Label(frameCor, text="B:")
+        txtB = Entry(frameCor,width=5,textvariable=svB)
+        lblCores = Label(frameCor, text='Amostra de cores', bg="red")
+        btnColorPicker = Button(frameCor, text='Color Picker',command=colorPicker_w2812b)
 
 
+        svR.trace("w", lambda name, index, mode, sv=svR: label_trocarCores(svR))
+        svG.trace("w", lambda name, index, mode, sv=svG: label_trocarCores(svG))
+        svB.trace("w", lambda name, index, mode, sv=svB: label_trocarCores(svB))
+        svR.trace("w", lambda *args: character_limit(txtR,3))
+        svG.trace("w", lambda *args: character_limit(txtG,3))
+        svB.trace("w", lambda *args: character_limit(txtB,3))
 
-frameWindow = Frame(window, relief=GROOVE)
-frameWindow.grid(column=0,row=0)
+        
+        lblR.grid(column=0, row=0)
+        txtR.grid(column=1, row=0)
+        lblG.grid(column=0, row=1)
+        txtG.grid(column=1, row=1)
+        lblB.grid(column=0, row=2)
+        txtB.grid(column=1, row=2)
+        lblCores.grid(column=2, row=0, rowspan=3, sticky=W+E+N+S)
+        btnColorPicker.grid(column=0, row=3,columnspan=3, sticky=W+E)
 
-frameCor = Frame(frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=2)
-frameCor.grid(column=0,row=0,sticky=W+E+N+S)
+    def construir_frame_pontos(self):
+        """ Constrói o quadro que define a região dos LEDs e efeitos """
+        framePonto = Frame(self.frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=2)
+        framePonto.grid(column=1,row=0,sticky=W+E+N+S)
 
-svR = StringVar()
-svG = StringVar()
-svB = StringVar()
-svR.trace("w", lambda name, index, mode, sv=svR: label_trocarCores(svR))
-svG.trace("w", lambda name, index, mode, sv=svG: label_trocarCores(svG))
-svB.trace("w", lambda name, index, mode, sv=svB: label_trocarCores(svB))
-svR.trace("w", lambda *args: character_limit(txtR,3))
-svG.trace("w", lambda *args: character_limit(txtG,3))
-svB.trace("w", lambda *args: character_limit(txtB,3))
+        # Define variáveis e eventos
+        # Ponto A e Ponto B possuem limite de 3 caracteres.
+        svPA = StringVar()
+        svPB = StringVar()
+        rdbtn = StringVar()
+        svPA.trace("w", lambda *args: character_limit(txtPontoA,3))
+        svPB.trace("w", lambda *args: character_limit(txtPontoB,3))
 
-Label(frameCor, text="R:").grid(column=0, row=0)
-txtR = Entry(frameCor,width=5,textvariable=svR)
-txtR.grid(column=1, row=0)
 
-Label(frameCor, text="G:").grid(column=0, row=1)
-txtG = Entry(frameCor,width=5,textvariable=svG)
-txtG.grid(column=1, row=1)
+        # Define Labels e Entrys
+        lblPontoA = Label(framePonto, text="Ponto A:")
+        txtPontoA = Entry(framePonto,width=5,textvariable=svPA)
+        lblPontoB = Label(framePonto, text="Ponto B:")
+        txtPontoB = Entry(framePonto,width=5,textvariable=svPB)
+        lblVel = Label(framePonto, text="Vel:")        
+        txtVel = Entry(framePonto,width=5)
+        lblFuncao1 = Label(framePonto, text="Função 1:")
+        txtFuncao1 = Entry(framePonto,width=5)
+        lblEffects = Label(framePonto, text="Efeitos:")
+        cmbEffects = ttk.Combobox(framePonto,width=20,state="readonly")
 
-Label(frameCor, text="B:").grid(column=0, row=2)
-txtB = Entry(frameCor,width=5,textvariable=svB)
-txtB.grid(column=1, row=2)
+        # Define localização dos labels e entrys
+        lblPontoA.grid(column=0, row=0)     
+        txtPontoA.grid(column=1, row=0,sticky=W)        
+        lblPontoB.grid(column=2, row=0,sticky=E)        
+        txtPontoB.grid(column=3, row=0,sticky=E)
+        lblVel.grid(column=0, row=1,sticky=E)        
+        txtVel.grid(column=1, row=1,sticky=W)
+        lblFuncao1.grid(column=2, row=1,sticky=E)        
+        txtFuncao1.grid(column=3, row=1,sticky=E)
+        lblEffects.grid(column=0,row=2,pady=10)
+        cmbEffects.grid(column=1, row=2,columnspan=3)
 
-lblCores = Label(frameCor, text='Amostra de cores', bg="red")
-lblCores.grid(column=2, row=0, rowspan=3, sticky=W+E+N+S)
-Button(frameCor, text='Color Picker',command=colorPicker_w2812b).grid(column=0, row=3,columnspan=3, sticky=W+E)
+        # Remove a funcao1 pois ela será mostrada dependendo do efeito seleiconado
+        lblFuncao1.grid_remove()
+        txtFuncao1.grid_remove()
+        cmbEffects['values']= ("0 - Ligar",
+            "1 - Grave",
+            "2 - Braco",
+            "3 - Corte Cobra",
+            "4 - Laser Esq",
+            "5 - Corte",
+            "6 - Teatro",
+            "7 - Aleatorio Fade",
+            "8 - Bass Braco Invert",
+            "9 - Teste")
+        cmbEffects.current(0)
+        cmbEffects.bind("<<ComboboxSelected>>", mostrarTxtFuncao)
 
-framePonto = Frame(frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=2)
-framePonto.grid(column=1,row=0,sticky=W+E+N+S)
+        # Define Radiobutton de outros efeitos
+        outrosEfeitos = [("Desligado","0"),("ArcoIris","1")]
+        for outroEfeito, val in outrosEfeitos:
+            Radiobutton(framePonto,text=outroEfeito,indicatoron = 0,variable=rdbtn,value=val,relief=FLAT,command=outros_efeitos).grid(column=val,row=3)
 
-Label(framePonto, text="Ponto A:").grid(column=0, row=0)
-svPA = StringVar()
-svPA.trace("w", lambda *args: character_limit(txtPontoA,3))
-txtPontoA = Entry(framePonto,width=5,textvariable=svPA)
-txtPontoA.grid(column=1, row=0,sticky=W)
-
-Label(framePonto, text="Ponto B:").grid(column=2, row=0,sticky=E)
-svPB = StringVar()
-svPB.trace("w", lambda *args: character_limit(txtPontoB,3))
-txtPontoB = Entry(framePonto,width=5,textvariable=svPB)
-txtPontoB.grid(column=3, row=0,sticky=E)
-
-Label(framePonto, text="Vel:").grid(column=0, row=1,sticky=E)
-txtVel = Entry(framePonto,width=5)
-txtVel.grid(column=1, row=1,sticky=W)
-
-lblFuncao1 = Label(framePonto, text="Função 1:")
-lblFuncao1.grid(column=2, row=1,sticky=E)
-lblFuncao1.grid_remove()
-txtFuncao1 = Entry(framePonto,width=5)
-txtFuncao1.grid(column=3, row=1,sticky=E)
-txtFuncao1.grid_remove()
-
-lblEffects = Label(framePonto, text="Efeitos:")
-lblEffects.grid(column=0,row=2,pady=10)
-
-cmbEffects = ttk.Combobox(framePonto,width=20,state="readonly")
-cmbEffects['values']= ("0 - Ligar",
-	"1 - Grave",
-	"2 - Braco",
-	"3 - Corte Cobra",
-	"4 - Laser Esq",
-	"5 - Corte",
-	"6 - Teatro",
-	"7 - Aleatorio Fade",
-	"8 - Bass Braco Invert",
-	"9 - Teste")
-cmbEffects.current(0) #set the selected item
-cmbEffects.grid(column=1, row=2,columnspan=3)
-cmbEffects.bind("<<ComboboxSelected>>", mostrarTxtFuncao)
-
-v = StringVar()
-outrosEfeitos = [("Desligado","0"),("ArcoIris","1")]
-for outroEfeito, val in outrosEfeitos:
-    Radiobutton(framePonto,text=outroEfeito,indicatoron = 0,variable=v,value=val,relief=FLAT,command=outros_efeitos).grid(column=val,row=3)
-
-frameBotaoTocar = Frame(frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=1)
-frameBotaoTocar.grid(column=0,row=1,columnspan=2,sticky=W+E)
-
-Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=testLED).grid(column=0,row=0)
-
-window.config(menu=menu)
-window.title("Sway LED")
-window.bind_all("<F9>",reiniciar_app)
-window.bind_all("<Return>",testLED)
-window.mainloop()
 
 if __name__ == "__main__":
     window = Tk()
@@ -522,5 +532,5 @@ if __name__ == "__main__":
         window.iconbitmap("swayled.ico")
     except:
         addErros('_tkinter.TclError','window.iconbitmap("swayled.ico")',sys.exc_info()[1])
+    aplicativo = SwayLEDapp(window)
     window.mainloop()
-
