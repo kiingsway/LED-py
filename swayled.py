@@ -10,7 +10,6 @@ import random
 import globals
 import argparse
 import threading
-import platform
 from decimal import *
 from itertools import product
 from functools import partial
@@ -63,166 +62,9 @@ except Exception: addErros(sys.exc_info()[0],'from Tkinter import *',sys.exc_inf
 try: from PIL import ImageTk, Image
 except: print('Sem bibliotecas de imagem. Instale-as com: pip install Pillow')
 
-print('Carregando funções...')
 
-def autoscroll(sbar, first, last):
-    """Hide and show scrollbar as needed."""
-    first, last = float(first), float(last)
-    if first <= 0 and last >= 1:
-        sbar.grid_remove()
-    else:
-        sbar.grid()
-    sbar.set(first, last)
-
-
-def janelaLightpaint():
-    tam_base = 300
-
-    janelaParaLightpaint = Toplevel(window)
-    janelaParaLightpaint.title('Lightpaint')
-    janelaParaLightpaint.geometry('800x400')
-
-
-
-    def frame_maismenos(aumentar):
-        if aumentar:
-            if globals.taxa_frame < 1000:
-                globals.taxa_frame += 100
-                lblFrame.delete(0,END)
-                lblFrame.insert(0,globals.taxa_frame)
-        else:
-            if globals.taxa_frame > 100:
-                globals.taxa_frame -= 100
-                lblFrame.delete(0,END)
-                lblFrame.insert(0,globals.taxa_frame)
-
-
-    def coluna_maismenos(aumentar):
-        if aumentar:
-            if globals.taxa_coluna < 10:
-                globals.taxa_coluna += 1
-                lblColuna.delete(0,END)
-                lblColuna.insert(0,globals.taxa_coluna)
-        else:
-            if globals.taxa_coluna > 1:
-                globals.taxa_coluna -= 1
-                lblColuna.delete(0,END)
-                lblColuna.insert(0,globals.taxa_coluna)
-
-    def trocar_velocidade():
-        globals.taxa_frame = int(lblFrame.get())
-        globals.taxa_coluna = int(lblColuna.get())
-
-    def abrir_imagem():
-        def miniatura(img_mini):
-            alt = img_mini.size[0]
-            lar = img_mini.size[1]
-            if alt >= tam_base or lar >= tam_base:
-                if alt > lar:
-                    proporcao = alt / tam_base
-                elif lar >= alt:
-                    proporcao = lar / tam_base
-                nova_alt = alt / proporcao
-                nova_lar = lar / proporcao
-                img_mini = img_mini.resize((int(nova_alt),int(nova_lar)), Image.ANTIALIAS)
-            return img_mini
-
-        if platform.system() == "Windows": local_arquivo = tkFileDialog.askopenfilename(initialdir = "Z:\\Projetos\\LED-py\\Images",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
-        else: local_arquivo = tkFileDialog.askopenfilename(initialdir = "/home/pi/Projetos/LED-py/Images",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
-        txtImagem.delete(0,END)
-        txtImagem.insert(0,local_arquivo.split('/')[-1])
-        # try:
-        globals.imagem_arquivo = Image.open(local_arquivo).convert("RGB")
-        imgTk = ImageTk.PhotoImage(miniatura(globals.imagem_arquivo))
-        lblImagem.config(image=imgTk)
-        lblImagem.image = imgTk
-        lightpaintingThread = threading.Thread(target=lp)
-        lightpaintingThread.start()
-        globals.lpLigado = True
-        # except AttributeError: print('Upload da imagem cancelado')
-
-    def play_pausePainting():
-        if globals.lpLigado:
-            lp.parar_painting = True
-            btnPl.config(text='Tocar')
-            globals.lpLigado = False
-        else:
-            lightpaintingThread = threading.Thread(target=lp)
-            lightpaintingThread.start()
-            btnPl.config(text='Pausar')
-            globals.lpLigado = True
-
-    def reverter(alvo):
-        if alvo == 'x':
-            if ckb1.get() == 1:
-                globals.reverter_x = True
-            else:
-                globals.reverter_x = False
-        if alvo == 'y':
-            if ckb2.get() == 1:
-                globals.reverter_y = True
-            else:
-                globals.reverter_y = False
-
-    
-
-
-    frame_campos1 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
-    frame_campos1.grid(column=0,row=0)
-
-    txtImagem = Entry(frame_campos1,width=40)
-    txtImagem.grid(column=0,row=0)
-    Button(frame_campos1,text='Escolher imagem...',command=abrir_imagem).grid(column=1,row=0)
-    btnPl = Button(frame_campos1,text='Pausar',command= lambda: play_pausePainting())
-    btnPl.grid(column=2,row=0)
-
-    frame_campos2 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
-    frame_campos2.grid(column=0,row=1)
-
-    Label(frame_campos2,text='Taxa Frame:').grid(column=0,row=0)
-    Button(frame_campos2,text='-',command=lambda:frame_maismenos(False)).grid(column=1,row=0)
-    lblFrame = Entry(frame_campos2,width=5)
-    lblFrame.insert(0,globals.taxa_frame)
-    lblFrame.grid(column=2,row=0)
-    Button(frame_campos2,text='+',command=lambda:frame_maismenos(True)).grid(column=3,row=0)
-    Button(frame_campos2,text='Trocar velocidade',command=trocar_velocidade).grid(column=4,row=0)
-
-    frame_campos3 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
-    frame_campos3.grid(column=0,row=2)
-
-    Label(frame_campos3,text='Taxa Coluna:').grid(column=0,row=0)
-    Button(frame_campos3,text='-',command=lambda:coluna_maismenos(False)).grid(column=1,row=0)
-    lblColuna = Entry(frame_campos3,width=5)
-    lblColuna.insert(0,globals.taxa_coluna)
-    lblColuna.grid(column=2,row=0)
-    Button(frame_campos3,text='+',command=lambda:coluna_maismenos(True)).grid(column=3,row=0)
-    Button(frame_campos3,text='Trocar velocidade',command=trocar_velocidade).grid(column=4,row=0)
-
-    frame_campos4 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
-    frame_campos4.grid(column=0,row=3)
-
-    ckb1 = IntVar()
-    ckb2 = IntVar()
-    Checkbutton(frame_campos4, text='Reverter X', variable=ckb1, command=lambda:reverter('x') ).grid(row=0,column=0)
-    Checkbutton(frame_campos4, text='Reverter Y', variable=ckb2, command=lambda:reverter('y') ).grid(row=0,column=1)
-
-    frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED,bd=5)
-    frame_imagepicker.grid(column=1,row=0,rowspan=4)
-
-    lblImagem = Label(frame_imagepicker, width=tam_base,height=tam_base)
-    lblImagem.grid(column=1,row=0)
-    abrir_imagem()
-
-
-
-def validateFields():
-    if txtPontoA.get() == '':
-        tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
-        return False
-    return True
-
-def testLED(event=0):
-    if not validateFields(): return
+def ligar_leds(event=0):
+    if not SwayLEDapp.validar_campos(): return
 
     globals.outroEfeitoRainbow = False
 
@@ -288,79 +130,188 @@ def desligar():
     try: off()
     except: pass
 
-def colorPicker_w2812b():
-    color = askcolor()
-    rPicker = int(color[0][0])
-    gPicker = int(color[0][1])
-    bPicker = int(color[0][2])
-
-    txtR.delete(0,END)
-    txtR.insert(0,rPicker)	
-    txtG.delete(0,END)
-    txtG.insert(0,gPicker)
-    txtB.delete(0,END)
-    txtB.insert(0,bPicker)
-
-    labelTroca_de_Cores(rPicker,gPicker,bPicker)
-
-def label_trocarCores(sv):
-    if txtR.get() == '': corVermelha = 0
-    else: corVermelha = int(txtR.get())
-    if txtG.get() == '': corVerde = 0
-    else: corVerde = int(txtG.get())
-    if txtB.get() == '': corAzul = 0
-    else: corAzul = int(txtB.get())
-    labelTroca_de_Cores(corVermelha, corVerde, corAzul)
-
-def labelTroca_de_Cores(R,G,B):
-    novas_cores = "#%0.2X%0.2X%0.2X" % (R,G,B)
-    # lblCores.config(bg=novas_cores)
-    try: lblCores.config(bg=novas_cores)
-    except TclError: print ("Cor inválida: R:{} G:{} B:{} {}".format(R,G,B,novas_cores))
-
-def colorPicker_5050():
-    color = askcolor()
-    try: fitaLed(color[0][0],color[0][1],color[0][2])
-    except: print ("LEDs 5050 (não endereçáveis) não foi adicionado")
-
-def mostrarTxtFuncao(x):
-    if cmbEffects.current() == 3:
-        lblFuncao1.config(text = "Tamanho:")
-        lblFuncao1.grid()
-        txtFuncao1.grid()
-
-    elif cmbEffects.current() == 4:
-        lblFuncao1.config(text = "Duração:")
-        lblFuncao1.grid()
-        txtFuncao1.grid()
-
-    elif cmbEffects.current() == 6:
-        lblFuncao1.config(text = "Duração:")
-        lblFuncao1.grid()
-        txtFuncao1.grid()
-
-    else:
-        lblFuncao1.grid_remove()
-        txtFuncao1.grid_remove()
 
 
-
-
-
-def character_limit(entry_text, limit_char):
-    if len(entry_text.get()) > limit_char:
-        entry_text.delete(limit_char,END)
 
 print('Carregando programa...')
 
-    
+
+class JanelaLightpaint(Toplevel):
+    """ Classe que define a janela de lightpaint
+    Lightpaint é fotografia em longa exposição com
+    alguma luz em movimento. """
+
+    def __init__(self):
+        # Constrói toda a janela lightpaint
+        Toplevel.__init__(self)
+        self.title("Lightpaint")
+        self.construir_janela()
+        self.abrir_imagem()
+
+    def construir_janela(self):
+        # Define o primeiro quadro:
+        frame_campos1 = Frame(self, relief=RAISED, bd=5)
+        self.txtImagem = Entry(frame_campos1, width=40)
+        btnEscolherImagem = Button(frame_campos1, text='Escolher imagem...', command=self.abrir_imagem)
+        self.btnPlayPause = Button(frame_campos1, text='Pausar', command=self.play_pausePainting)
+
+        # Define o segundo quadro:
+        frame_campos2 = Frame(self, relief=RAISED, bd=5)
+        lblTaxaFrame = Label(frame_campos2, text='Taxa Frame:')
+        btnDiminuirFrame = Button(frame_campos2, text='-', command=lambda:self.alterar_frame(False))
+        self.txtFrame = Entry(frame_campos2, width=5)
+        btnAumentarFrame = Button(frame_campos2, text='+', command=lambda:self.alterar_frame(True))
+        btnTrocarVelocidadeFrame = Button(frame_campos2, text='Trocar velocidade', command=lambda:self.trocar_velocidade("frame"))
+
+        # Define o terceiro quadro:
+        frame_campos3 = Frame(self, relief=RAISED, bd=5)
+        self.lblTaxaColuna = Label(frame_campos3, text='Taxa Coluna:')
+        btnDiminuirColuna = Button(frame_campos3, text='-', command=lambda:self.alterar_coluna(False))
+        self.txtColuna = Entry(frame_campos3, width=5)
+        btnAumentarColuna = Button(frame_campos3, text='+', command=lambda:self.alterar_coluna(True))
+        btnTrocarVelocidadeColuna = Button(frame_campos3, text='Trocar velocidade', command=lambda:self.trocar_velocidade("coluna"))
+        
+        # Define o quarto quadro:
+        frame_campos4 = Frame(self, relief=RAISED, bd=5)
+        self.ckbx = IntVar()
+        self.ckby = IntVar()
+        ckbReverterX = Checkbutton(frame_campos4, text='Reverter X', variable=self.ckbx, command=lambda:self.reverter('x') )
+        ckbReverterY = Checkbutton(frame_campos4, text='Reverter Y', variable=self.ckby, command=lambda:self.reverter('y') )
+
+        # Define o quinto quadro, visualização da imagem:
+        frame_imagepicker = Frame(self, padx=10, pady=10, relief=RAISED, bd=5)
+        self.lblImagem = Label(frame_imagepicker)
+
+        # Constrói o primeiro quadro:
+        frame_campos1.grid(column=0, row=0)
+        self.txtImagem.grid(column=0, row=0)
+        btnEscolherImagem.grid(column=1, row=0)
+        self.btnPlayPause.grid(column=2, row=0)
+
+        # Constrói o segundo quadro:
+        frame_campos2.grid(column=0, row=1)
+        lblTaxaFrame.grid(column=0, row=0)
+        btnDiminuirFrame.grid(column=1, row=0)
+        self.txtFrame.insert(0, globals.taxa_frame)
+        self.txtFrame.grid(column=2, row=0)
+        btnAumentarFrame.grid(column=3, row=0)
+        btnTrocarVelocidadeFrame.grid(column=4, row=0)
+
+        # Constrói o terceiro quadro:
+        frame_campos3.grid(column=0, row=2)
+        self.lblTaxaColuna.grid(column=0, row=0)
+        btnDiminuirColuna.grid(column=1, row=0)
+        self.txtColuna.insert(0, globals.taxa_coluna)
+        self.txtColuna.grid(column=2, row=0)
+        btnAumentarColuna.grid(column=3, row=0)
+        btnTrocarVelocidadeColuna.grid(column=4, row=0)
+
+        # Constrói o quarto quadro:
+        frame_campos4.grid(column=0, row=3)
+        ckbReverterX.grid(row=0, column=0)
+        ckbReverterY.grid(row=0, column=1)
+
+        # Constrói o quinto quadro:
+        frame_imagepicker.grid(column=1, row=0, rowspan=4)
+        self.lblImagem.grid(column=1, row=0)
+
+        
+    def abrir_imagem(self):
+        # Insere a imagem que for selecionada em uma variável
+        local_arquivo = tkFileDialog.askopenfilename(initialdir = os.getcwd(),
+            title = "Selecione a imagem...",
+            filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
+
+        # Apaga o texto do txtImagem e insere o nome do arquivo com extensão
+        self.txtImagem.delete(0,END)
+        self.txtImagem.insert(0,local_arquivo.split('/')[-1])
+
+        # Converte a imagem em RGB (valor triplo de 8 bits)
+        # Faz uma miniatura da imagem na lblImagem e 
+        # Inicia o processo de lightpainting
+        globals.imagem_arquivo = Image.open(local_arquivo).convert("RGB")
+        imgTk = ImageTk.PhotoImage(self.miniatura(globals.imagem_arquivo))
+        self.lblImagem.config(image=imgTk)
+        self.lblImagem.image = imgTk
+        globals.lpLigado = False
+        self.play_pausePainting()
+
+    def miniatura(self, img_mini):
+        """ Faz uma miniatura da imagem original """
+        tam_base = 300
+        alt = img_mini.size[0]
+        lar = img_mini.size[1]
+        if alt >= tam_base or lar >= tam_base:
+            if alt > lar:
+                proporcao = alt / tam_base
+            elif lar >= alt:
+                proporcao = lar / tam_base
+            nova_alt = alt / proporcao
+            nova_lar = lar / proporcao
+            img_mini = img_mini.resize((int(nova_alt),int(nova_lar)), Image.ANTIALIAS)
+        return img_mini
+
+    def trocar_velocidade(self, botao_pressionado):
+        """ Ao pressionar o botão de trocar velocidade,
+        altera a taxa de frame ou da coluna para a velocidade
+        inserida. """
+        if botao_pressionado == "frame": 
+            globals.taxa_frame = int(self.txtFrame.get())
+        else:
+            globals.taxa_coluna = int(self.txtColuna.get())
+
+    def alterar_frame(self, aumentar):
+        if aumentar:
+            if globals.taxa_frame < 1000:
+                globals.taxa_frame += 100
+                self.txtFrame.delete(0,END)
+                self.txtFrame.insert(0,globals.taxa_frame)
+        else:
+            if globals.taxa_frame > 100:
+                globals.taxa_frame -= 100
+                self.txtFrame.delete(0,END)
+                self.txtFrame.insert(0,globals.taxa_frame)
+
+    def alterar_coluna(self, aumentar):
+        if aumentar:
+            if globals.taxa_coluna < 10:
+                globals.taxa_coluna += 1
+                self.txtColuna.delete(0,END)
+                self.txtColuna.insert(0,globals.taxa_coluna)
+        else:
+            if globals.taxa_coluna > 1:
+                globals.taxa_coluna -= 1
+                self.txtColuna.delete(0,END)
+                self.txtColuna.insert(0,globals.taxa_coluna)
+
+    def reverter(self, alvo):
+        if alvo == 'x':
+            if self.ckbx.get() == 1:
+                globals.reverter_x = True
+            else:
+                globals.reverter_x = False
+        if alvo == 'y':
+            if self.ckby.get() == 1:
+                globals.reverter_y = True
+            else:
+                globals.reverter_y = False
+
+    def play_pausePainting(self):
+        if globals.lpLigado:
+            lp.parar_painting = True
+            self.btnPlayPause.config(text='Ligar')
+            globals.lpLigado = False
+        else:
+            lightpaintingThread = threading.Thread(target=lp)
+            lightpaintingThread.start()
+            self.btnPlayPause.config(text='Pausar')
+            globals.lpLigado = True
 
 class JanelaErros(Toplevel):
-    """ Class que define a janela de erros """
+    """ Classe que define a janela de erros """
 
-    def __init__(self, original):
+    def __init__(self):
         """ Constrói toda a janela de erros """
-        self.janela_original = original
         Toplevel.__init__(self)
         self.title("Erros SwayLED")
         self.construir_janela()
@@ -371,8 +322,8 @@ class JanelaErros(Toplevel):
         hsb = ttk.Scrollbar(orient="horizontal")
 
         #   Objeto Treeview
-        tree = ttk.Treeview(self, columns=("codigoProblematico","erroPython"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
-        xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
+        tree = ttk.Treeview(self, columns=("codigoProblematico","erroPython"), yscrollcommand=lambda f, l: self.autoscroll(vsb, f, l),
+        xscrollcommand=lambda f, l:self.autoscroll(hsb, f, l))
 
         #   Barras de scroll às vistas x e y do objeto Treeview
         vsb['command'] = tree.yview
@@ -397,6 +348,15 @@ class JanelaErros(Toplevel):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
+    def autoscroll(self, sbar, first, last):
+        """Hide and show scrollbar as needed."""
+        first, last = float(first), float(last)
+        if first <= 0 and last >= 1:
+            sbar.grid_remove()
+        else:
+            sbar.grid()
+        sbar.set(first, last)
+
 class SwayLEDapp(object):
     """Classe que define a janela principal do programa"""
 
@@ -405,21 +365,21 @@ class SwayLEDapp(object):
         self.window = parent
         self.window.title("Sway LED")
         self.window.bind_all("<F9>",self.reiniciar_app)
-        self.window.bind_all("<Return>",testLED)
-        self.frameWindow = Frame(window, relief=GROOVE)
+        self.window.bind_all("<Return>",self.ligar_leds)
+        self.frameWindow = Frame(self.window, relief=GROOVE)
         self.frameWindow.grid(column=0,row=0)
         self.construir_menu()
         self.construir_frame_cores()
         self.construir_frame_pontos()
         frameBotaoTocar = Frame(self.frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=0)
         frameBotaoTocar.grid(column=0,row=1,columnspan=2,sticky=W+E)
-        Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=testLED).grid(column=0,row=0)
+        Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=self.ligar_leds).grid(column=0,row=0)
 
     def construir_menu(self):
         """ Constrói o menu da janela principal """
         self.menu = Menu(self.window)
         sel_menu = Menu(self.menu,tearoff=False)
-        sel_menu.add_command(label='Pegar RGB 5050',command=colorPicker_5050)
+        sel_menu.add_command(label='Pegar RGB 5050',command=self.colorPicker_5050)
         sel_menu.add_separator()
         sel_menu.add_command(label='Desligar LEDs',command=desligar)
         sel_menu.add_separator()
@@ -429,7 +389,7 @@ class SwayLEDapp(object):
         self.menu.add_cascade(label='Arquivo', menu=sel_menu)
 
         sel_menu = Menu(self.menu,tearoff=False)
-        sel_menu.add_command(label='LightPaint',command=janelaLightpaint)
+        sel_menu.add_command(label='LightPaint',command=JanelaLightpaint)
         self.menu.add_cascade(label='Efeitos', menu=sel_menu)
         self.window.config(menu=self.menu)
 
@@ -443,30 +403,28 @@ class SwayLEDapp(object):
         svB = StringVar()
 
         lblR = Label(frameCor, text="R:")
-        txtR = Entry(frameCor,width=5,textvariable=svR)
+        self.txtR = Entry(frameCor,width=5,textvariable=svR)
         lblG = Label(frameCor, text="G:")
-        txtG = Entry(frameCor,width=5,textvariable=svG)
+        self.txtG = Entry(frameCor,width=5,textvariable=svG)
         lblB = Label(frameCor, text="B:")
-        txtB = Entry(frameCor,width=5,textvariable=svB)
-        lblCores = Label(frameCor, text='Amostra de cores', bg="red")
-        btnColorPicker = Button(frameCor, text='Color Picker',command=colorPicker_w2812b)
+        self.txtB = Entry(frameCor,width=5,textvariable=svB)
+        self.lblCores = Label(frameCor, text='Amostra de cores', bg="red")
+        btnColorPicker = Button(frameCor, text='Color Picker',command=self.colorPicker_w2812b)
 
-
-        svR.trace("w", lambda name, index, mode, sv=svR: label_trocarCores(svR))
-        svG.trace("w", lambda name, index, mode, sv=svG: label_trocarCores(svG))
-        svB.trace("w", lambda name, index, mode, sv=svB: label_trocarCores(svB))
-        svR.trace("w", lambda *args: character_limit(txtR,3))
-        svG.trace("w", lambda *args: character_limit(txtG,3))
-        svB.trace("w", lambda *args: character_limit(txtB,3))
-
+        svR.trace("w", lambda name, index, mode, sv=svR: self.label_trocarCores(svR))
+        svG.trace("w", lambda name, index, mode, sv=svG: self.label_trocarCores(svG))
+        svB.trace("w", lambda name, index, mode, sv=svB: self.label_trocarCores(svB))
+        svR.trace("w", lambda *args: self.limite_caracteres(self.txtR,3))
+        svG.trace("w", lambda *args: self.limite_caracteres(self.txtG,3))
+        svB.trace("w", lambda *args: self.limite_caracteres(self.txtB,3))
         
         lblR.grid(column=0, row=0)
-        txtR.grid(column=1, row=0)
+        self.txtR.grid(column=1, row=0)
         lblG.grid(column=0, row=1)
-        txtG.grid(column=1, row=1)
+        self.txtG.grid(column=1, row=1)
         lblB.grid(column=0, row=2)
-        txtB.grid(column=1, row=2)
-        lblCores.grid(column=2, row=0, rowspan=3, sticky=W+E+N+S)
+        self.txtB.grid(column=1, row=2)
+        self.lblCores.grid(column=2, row=0, rowspan=3, sticky=W+E+N+S)
         btnColorPicker.grid(column=0, row=3,columnspan=3, sticky=W+E)
 
     def construir_frame_pontos(self):
@@ -479,38 +437,38 @@ class SwayLEDapp(object):
         svPA = StringVar()
         svPB = StringVar()
         rdbtn = StringVar()
-        svPA.trace("w", lambda *args: character_limit(txtPontoA,3))
-        svPB.trace("w", lambda *args: character_limit(txtPontoB,3))
+        svPA.trace("w", lambda *args: self.limite_caracteres(self.txtPontoA,3))
+        svPB.trace("w", lambda *args: self.limite_caracteres(self.txtPontoB,3))
 
 
         # Define Labels e Entrys
         lblPontoA = Label(framePonto, text="Ponto A:")
-        txtPontoA = Entry(framePonto,width=5,textvariable=svPA)
+        self.txtPontoA = Entry(framePonto,width=5,textvariable=svPA)
         lblPontoB = Label(framePonto, text="Ponto B:")
-        txtPontoB = Entry(framePonto,width=5,textvariable=svPB)
+        self.txtPontoB = Entry(framePonto,width=5,textvariable=svPB)
         lblVel = Label(framePonto, text="Vel:")        
-        txtVel = Entry(framePonto,width=5)
-        lblFuncao1 = Label(framePonto, text="Função 1:")
-        txtFuncao1 = Entry(framePonto,width=5)
+        self.txtVel = Entry(framePonto,width=5)
+        self.lblFuncao1 = Label(framePonto, text="Função 1:")
+        self.txtFuncao1 = Entry(framePonto,width=5)
         lblEffects = Label(framePonto, text="Efeitos:")
-        cmbEffects = ttk.Combobox(framePonto,width=20,state="readonly")
+        self.cmbEffects = ttk.Combobox(framePonto,width=20,state="readonly")
 
         # Define localização dos labels e entrys
         lblPontoA.grid(column=0, row=0)     
-        txtPontoA.grid(column=1, row=0,sticky=W)        
+        self.txtPontoA.grid(column=1, row=0,sticky=W)        
         lblPontoB.grid(column=2, row=0,sticky=E)        
-        txtPontoB.grid(column=3, row=0,sticky=E)
+        self.txtPontoB.grid(column=3, row=0,sticky=E)
         lblVel.grid(column=0, row=1,sticky=E)        
-        txtVel.grid(column=1, row=1,sticky=W)
-        lblFuncao1.grid(column=2, row=1,sticky=E)        
-        txtFuncao1.grid(column=3, row=1,sticky=E)
+        self.txtVel.grid(column=1, row=1,sticky=W)
+        self.lblFuncao1.grid(column=2, row=1,sticky=E)        
+        self.txtFuncao1.grid(column=3, row=1,sticky=E)
         lblEffects.grid(column=0,row=2,pady=10)
-        cmbEffects.grid(column=1, row=2,columnspan=3)
+        self.cmbEffects.grid(column=1, row=2,columnspan=3)
 
         # Remove a funcao1 pois ela será mostrada dependendo do efeito seleiconado
-        lblFuncao1.grid_remove()
-        txtFuncao1.grid_remove()
-        cmbEffects['values']= ("0 - Ligar",
+        self.lblFuncao1.grid_remove()
+        self.txtFuncao1.grid_remove()
+        self.cmbEffects['values']= ("0 - Ligar",
             "1 - Grave",
             "2 - Braco",
             "3 - Corte Cobra",
@@ -520,8 +478,8 @@ class SwayLEDapp(object):
             "7 - Aleatorio Fade",
             "8 - Bass Braco Invert",
             "9 - Teste")
-        cmbEffects.current(0)
-        cmbEffects.bind("<<ComboboxSelected>>", mostrarTxtFuncao)
+        self.cmbEffects.current(0)
+        self.cmbEffects.bind("<<ComboboxSelected>>", self.mostrar_funcao)
 
         # Define Radiobutton de outros efeitos
         outrosEfeitos = [("Desligado","0"),("ArcoIris","1")]
@@ -529,7 +487,7 @@ class SwayLEDapp(object):
             Radiobutton(framePonto,text=outroEfeito,indicatoron = 0,variable=rdbtn,value=val,relief=FLAT,command=outros_efeitos).grid(column=val,row=3)
 
     def abrir_janela_erros(self):
-        outra_janela = JanelaErros(self)
+        outra_janela = JanelaErros()
 
     def reiniciar_app(self, event=0):
         """Restarts the current program.
@@ -540,6 +498,92 @@ class SwayLEDapp(object):
         print("App reiniciado")
         os.execl(python, python, * sys.argv)
 
+    def limite_caracteres(self, texto, limite):
+        """ Deleta o último caracter quando passar do limite """
+        if len(texto.get()) > limite:
+            texto.delete(limite,END)
+
+    def mostrar_funcao(self, event=0):
+        """ Dependendo do efeito escolhido, mostra-se um campo para
+        definir o tamanho dos pixels do efeito ou a duração do efeito """
+        if self.cmbEffects.current() == 3:
+            self.lblFuncao1.config(text = "Tamanho:")
+            self.lblFuncao1.grid()
+            self.txtFuncao1.grid()
+
+        elif self.cmbEffects.current() == 4:
+            self.lblFuncao1.config(text = "Duração:")
+            self.lblFuncao1.grid()
+            self.txtFuncao1.grid()
+
+        elif self.cmbEffects.current() == 6:
+            self.lblFuncao1.config(text = "Duração:")
+            self.lblFuncao1.grid()
+            self.txtFuncao1.grid()
+
+        else:
+            self.lblFuncao1.grid_remove()
+            self.txtFuncao1.grid_remove()
+
+    def label_trocarCores(self, event=0):
+        if self.txtR.get() == '': corVermelha = 0
+        else: corVermelha = int(self.txtR.get())
+        if self.txtG.get() == '': corVerde = 0
+        else: corVerde = int(self.txtG.get())
+        if self.txtB.get() == '': corAzul = 0
+        else: corAzul = int(self.txtB.get())
+        self.labelTroca_de_Cores(corVermelha, corVerde, corAzul)
+
+    def colorPicker_w2812b(self, event=0):
+        color = askcolor()
+        rPicker = int(color[0][0])
+        gPicker = int(color[0][1])
+        bPicker = int(color[0][2])
+
+        self.txtR.delete(0,END)
+        self.txtR.insert(0,rPicker)  
+        self.txtG.delete(0,END)
+        self.txtG.insert(0,gPicker)
+        self.txtB.delete(0,END)
+        self.txtB.insert(0,bPicker)
+
+        self.labelTroca_de_Cores(rPicker,gPicker,bPicker)
+
+    def colorPicker_5050(self):
+        color = askcolor()
+        try: fitaLed(color[0][0],color[0][1],color[0][2])
+        except: print ("LEDs 5050 (não endereçáveis) não foi adicionado")
+
+    def labelTroca_de_Cores(self, R,G,B):
+        novas_cores = "#%0.2X%0.2X%0.2X" % (R,G,B)
+        # self.lblCores.config(bg=novas_cores)
+        try: self.lblCores.config(bg=novas_cores)
+        except TclError: print ("Cor inválida: R:{} G:{} B:{} {}".format(R,G,B,novas_cores))
+
+    def campos_validados(self):
+        if self.txtPontoA.get() == '':
+            tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
+            return False
+        return True
+
+    def ligar_leds(self, event=0):
+        if not self.campos_validados(): return
+
+        globals.outroEfeitoRainbow = False
+
+        pontoA = int(self.txtPontoA.get())
+        if self.txtPontoB.get() == '': pontoB = pontoA
+        else: pontoB = int(self.txtPontoB.get())
+        if self.txtR.get() == '': redLed = 0
+        else: redLed = int(self.txtR.get())
+        if self.txtG.get() == '': greenLed = 0
+        else: greenLed = int(self.txtG.get())
+        if self.txtB.get() == '': blueLed = 0
+        else: blueLed = int(self.txtB.get())
+        if self.txtVel.get() == '': vel = 0.1
+        else: vel = float(self.txtVel.get())
+        if self.txtFuncao1.get() == '': funcao1 = 3
+        else: funcao1 = int(self.txtFuncao1.get())
 
 if __name__ == "__main__":
     window = Tk()
