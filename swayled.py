@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-print("Importando bibliotecas comuns...")
+# Importanto bibliotecas comuns
 import os
 import sys
 import time
@@ -14,13 +14,15 @@ from decimal import *
 from itertools import product
 from functools import partial
 
-erros = []
+# Definição de erros
 
+erros = []
 def addErros(classe,codigo,erro):
 	erros.append(dict(tituloErro=classe,
     codigoProblematico=codigo,
     erroPython=erro))
-print("Importando bibliotecas dos LEDs...")
+
+# Importanto biblioteca de LEDs
 
 try: from Tkinter import *
 except ImportError: from tkinter import *
@@ -62,79 +64,82 @@ except Exception: addErros(sys.exc_info()[0],'from Tkinter import *',sys.exc_inf
 try: from PIL import ImageTk, Image
 except: print('Sem bibliotecas de imagem. Instale-as com: pip install Pillow')
 
+class efeitos(object):
 
-def ligar_leds(event=0):
-    if not SwayLEDapp.validar_campos(): return
+    def campos_validados(self):
+        if self.txtPontoA.get() == '':
+            tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
+            return False
+        return True
 
-    globals.outroEfeitoRainbow = False
+    def ligar_leds(self, event=0):
+        if not self.campos_validados(): return
 
-    pontoA = int(txtPontoA.get())
-    if txtPontoB.get() == '': pontoB = pontoA
-    else: pontoB = int(txtPontoB.get())
-    if txtR.get() == '': redLed = 0
-    else: redLed = int(txtR.get())
-    if txtG.get() == '': greenLed = 0
-    else: greenLed = int(txtG.get())
-    if txtB.get() == '': blueLed = 0
-    else: blueLed = int(txtB.get())
-    if txtVel.get() == '': vel = 0.1
-    else: vel = float(txtVel.get())
-
-    if txtFuncao1.get() == '': funcao1 = 3
-    else: funcao1 = int(txtFuncao1.get())
-
-    if cmbEffects.current() == 0:
-        testThread = threading.Thread(target=acenderLEDEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,))
-        testThread.start()
-    if cmbEffects.current() == 1:
-        testThread = threading.Thread(target=simpleBassEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
-        testThread.start()
-    if cmbEffects.current() == 2:
-        testThread = threading.Thread(target=bassBracoEffectBETA,args=(pontoB/10,redLed,greenLed,blueLed,vel,))
-        testThread.start()
-    if cmbEffects.current() == 3:
-        testThread = threading.Thread(target=corteCobraEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1,))
-        testThread.start()
-    if cmbEffects.current() == 4:
-        testThread = threading.Thread(target=laserLeftEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1,))
-        testThread.start()
-    if cmbEffects.current() == 5:
-        testThread = threading.Thread(target=corteEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
-        testThread.start()
-    if cmbEffects.current() == 6:
-        testThread = threading.Thread(target=teatroEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1))
-        testThread.start()
-    if cmbEffects.current() == 7:
-        testThread = threading.Thread(target=posAleatoriaFade,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
-        testThread.start()
-    if cmbEffects.current() == 8:
-        testThread = threading.Thread(target=bassBracoInvertEffect2,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
-        testThread.start()
-    if cmbEffects.current() == 9:
-        testThread = threading.Thread(target=megaman,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
-        testThread.start()
-
-def outros_efeitos():
-    efeito = v.get()
-    if efeito == "0":
-        print("Desliguei o rainbowCycle")
         globals.outroEfeitoRainbow = False
-    if efeito == "1":
-        print("Tentando entrar no rainbowCycle",end=' ')
-        outroEfeitoThread = threading.Thread(target=rainbowCycle)
-        globals.outroEfeitoRainbow = True
-        print('globals.outroEfeitoRainbow = {}'.format(globals.outroEfeitoRainbow))
-        outroEfeitoThread.start()
 
-def desligar():
-    try: off()
-    except: pass
+        pontoA = int(txtPontoA.get())
+        if txtPontoB.get() == '': pontoB = pontoA
+        else: pontoB = int(txtPontoB.get())
+        if txtR.get() == '': redLed = 0
+        else: redLed = int(txtR.get())
+        if txtG.get() == '': greenLed = 0
+        else: greenLed = int(txtG.get())
+        if txtB.get() == '': blueLed = 0
+        else: blueLed = int(txtB.get())
+        if txtVel.get() == '': vel = 0.1
+        else: vel = float(txtVel.get())
 
+        if txtFuncao1.get() == '': funcao1 = 3
+        else: funcao1 = int(txtFuncao1.get())
 
+        if cmbEffects.current() == 0:
+            testThread = threading.Thread(target=acenderLEDEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,))
+            testThread.start()
+        if cmbEffects.current() == 1:
+            testThread = threading.Thread(target=simpleBassEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
+            testThread.start()
+        if cmbEffects.current() == 2:
+            testThread = threading.Thread(target=bassBracoEffectBETA,args=(pontoB/10,redLed,greenLed,blueLed,vel,))
+            testThread.start()
+        if cmbEffects.current() == 3:
+            testThread = threading.Thread(target=corteCobraEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1,))
+            testThread.start()
+        if cmbEffects.current() == 4:
+            testThread = threading.Thread(target=laserLeftEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1,))
+            testThread.start()
+        if cmbEffects.current() == 5:
+            testThread = threading.Thread(target=corteEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
+            testThread.start()
+        if cmbEffects.current() == 6:
+            testThread = threading.Thread(target=teatroEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1))
+            testThread.start()
+        if cmbEffects.current() == 7:
+            testThread = threading.Thread(target=posAleatoriaFade,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
+            testThread.start()
+        if cmbEffects.current() == 8:
+            testThread = threading.Thread(target=bassBracoInvertEffect2,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
+            testThread.start()
+        if cmbEffects.current() == 9:
+            testThread = threading.Thread(target=megaman,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
+            testThread.start()
 
+    def outros_efeitos(self):
+        efeito = v.get()
+        if efeito == "0":
+            print("Desliguei o rainbowCycle")
+            globals.outroEfeitoRainbow = False
+        if efeito == "1":
+            print("Tentando entrar no rainbowCycle",end=' ')
+            outroEfeitoThread = threading.Thread(target=rainbowCycle)
+            globals.outroEfeitoRainbow = True
+            print('globals.outroEfeitoRainbow = {}'.format(globals.outroEfeitoRainbow))
+            outroEfeitoThread.start()
 
-print('Carregando programa...')
+    def desligar(self):
+        try: off()
+        except: pass
 
+# Classes das janelas do programa
 
 class JanelaLightpaint(Toplevel):
     """ Classe que define a janela de lightpaint
@@ -365,7 +370,7 @@ class SwayLEDapp(object):
         self.window = parent
         self.window.title("Sway LED")
         self.window.bind_all("<F9>",self.reiniciar_app)
-        self.window.bind_all("<Return>",self.ligar_leds)
+        self.window.bind_all("<Return>",lambda: efeitos.ligar_leds(self))
         self.frameWindow = Frame(self.window, relief=GROOVE)
         self.frameWindow.grid(column=0,row=0)
         self.construir_menu()
@@ -373,7 +378,7 @@ class SwayLEDapp(object):
         self.construir_frame_pontos()
         frameBotaoTocar = Frame(self.frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=0)
         frameBotaoTocar.grid(column=0,row=1,columnspan=2,sticky=W+E)
-        Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=self.ligar_leds).grid(column=0,row=0)
+        Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=efeitos.ligar_leds).grid(column=0,row=0)
 
     def construir_menu(self):
         """ Constrói o menu da janela principal """
@@ -381,7 +386,7 @@ class SwayLEDapp(object):
         sel_menu = Menu(self.menu,tearoff=False)
         sel_menu.add_command(label='Pegar RGB 5050',command=self.colorPicker_5050)
         sel_menu.add_separator()
-        sel_menu.add_command(label='Desligar LEDs',command=desligar)
+        sel_menu.add_command(label='Desligar LEDs',command=efeitos.desligar)
         sel_menu.add_separator()
         if len(erros) > 0: sel_menu.add_command(label='Erros', command=self.abrir_janela_erros)
         sel_menu.add_command(label='Resetar App',command=self.reiniciar_app,accelerator="F9")
@@ -484,7 +489,7 @@ class SwayLEDapp(object):
         # Define Radiobutton de outros efeitos
         outrosEfeitos = [("Desligado","0"),("ArcoIris","1")]
         for outroEfeito, val in outrosEfeitos:
-            Radiobutton(framePonto,text=outroEfeito,indicatoron = 0,variable=rdbtn,value=val,relief=FLAT,command=outros_efeitos).grid(column=val,row=3)
+            Radiobutton(framePonto,text=outroEfeito,indicatoron = 0,variable=rdbtn,value=val,relief=FLAT,command=efeitos.outros_efeitos).grid(column=val,row=3)
 
     def abrir_janela_erros(self):
         outra_janela = JanelaErros()
@@ -560,30 +565,30 @@ class SwayLEDapp(object):
         try: self.lblCores.config(bg=novas_cores)
         except TclError: print ("Cor inválida: R:{} G:{} B:{} {}".format(R,G,B,novas_cores))
 
-    def campos_validados(self):
-        if self.txtPontoA.get() == '':
-            tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
-            return False
-        return True
+    # def campos_validados(self):
+    #     if self.txtPontoA.get() == '':
+    #         tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
+    #         return False
+    #     return True
 
-    def ligar_leds(self, event=0):
-        if not self.campos_validados(): return
+    # def ligar_leds(self, event=0):
+    #     if not self.campos_validados(): return
 
-        globals.outroEfeitoRainbow = False
+    #     globals.outroEfeitoRainbow = False
 
-        pontoA = int(self.txtPontoA.get())
-        if self.txtPontoB.get() == '': pontoB = pontoA
-        else: pontoB = int(self.txtPontoB.get())
-        if self.txtR.get() == '': redLed = 0
-        else: redLed = int(self.txtR.get())
-        if self.txtG.get() == '': greenLed = 0
-        else: greenLed = int(self.txtG.get())
-        if self.txtB.get() == '': blueLed = 0
-        else: blueLed = int(self.txtB.get())
-        if self.txtVel.get() == '': vel = 0.1
-        else: vel = float(self.txtVel.get())
-        if self.txtFuncao1.get() == '': funcao1 = 3
-        else: funcao1 = int(self.txtFuncao1.get())
+    #     pontoA = int(self.txtPontoA.get())
+    #     if self.txtPontoB.get() == '': pontoB = pontoA
+    #     else: pontoB = int(self.txtPontoB.get())
+    #     if self.txtR.get() == '': redLed = 0
+    #     else: redLed = int(self.txtR.get())
+    #     if self.txtG.get() == '': greenLed = 0
+    #     else: greenLed = int(self.txtG.get())
+    #     if self.txtB.get() == '': blueLed = 0
+    #     else: blueLed = int(self.txtB.get())
+    #     if self.txtVel.get() == '': vel = 0.1
+    #     else: vel = float(self.txtVel.get())
+    #     if self.txtFuncao1.get() == '': funcao1 = 3
+    #     else: funcao1 = int(self.txtFuncao1.get())
 
 if __name__ == "__main__":
     window = Tk()
