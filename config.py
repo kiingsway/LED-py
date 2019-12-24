@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Tipo 0 = WS2812b | 1 = 5050
-# Pino 0 = 18
+janelaDefault = 'Configurações'
+
+udp = {'ip': '192.168.0.31', 'porta':12000}
 
 led = [{
 		'tipo': 'ws2812b',

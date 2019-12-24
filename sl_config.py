@@ -5,6 +5,12 @@
 
 import config
 
+import_neopixel = True
+try:
+	import neopixel
+except: 
+	import_neopixel = False
+
 try:
 	# Python 3
 	from tkinter import *
@@ -72,11 +78,68 @@ def construir_serverled(self, frame):
 	""" Função para construir a tela do serverLED. A comunicação via UDP
 	"""
 
-	frameConfigTitulo = LabelFrame(frame)
-	frameConfigTitulo.pack(fill=BOTH,expand=1)
+	frameTitulo = LabelFrame(frame)
+	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10))
 
-	lblConfigTitulo = Label(frameConfigTitulo, text='Comunicação via UDP para outro dispositivo')
-	lblConfigTitulo.pack(fill=BOTH,expand=1)
+	lblTitulo = Label(frameTitulo, text='Comunicação via UDP para outro dispositivo')
+	lblTitulo.pack(fill=BOTH,expand=1)
+
+	frameClienteServidor = LabelFrame(frame)
+	frameClienteServidor.pack(fill=BOTH,expand=1)
+
+	opcoesClienteServidor = ['Vou usar esse app para enviar os LEDs', 'Vou receber e ligar os LEDs nesse app']
+
+	lblAtencao = Label(frameClienteServidor, text='LEDs não foram configurados, portanto')
+	if import_neopixel == False:
+		lblAtencao.pack(anchor=W)
+		opcoesClienteServidor = ['Vou usar esse app para enviar os LEDs']
+	
+	cbxCliServ = Combobox(frameClienteServidor)
+	cbxCliServ['values'] = opcoesClienteServidor
+	cbxCliServ.set('Vou usar esse app para disparar os LEDs')
+	cbxCliServ.pack(fill=BOTH,expand=1)
+
+	frameUDP = LabelFrame(frame, text='Rede')
+	frameUDP.pack(fill=BOTH,expand=1)
+
+	lblIP = Label(frameUDP, text='IP:')
+	lblIP.grid(row=0,column=0)
+
+	txtIP = Entry(frameUDP)
+	txtIP.insert(0, config.udp['ip'])
+	txtIP.grid(row=0,column=1)
+
+	lblPorta = Label(frameUDP, text='Porta:')
+	lblPorta.grid(row=0,column=2)
+
+	txtPorta = Entry(frameUDP)
+	txtPorta.insert(0, config.udp['porta'])
+	txtPorta.grid(row=0,column=3)
+
+	btnIniciarUDP = Button(frameUDP, text='Iniciar comunicação...')
+	btnIniciarUDP.grid(row=1,column=0, columnspan=5, sticky=W+E)
+
+def construir_config_app(self, frame):
+	""" Função para construir a tela das configurações.
+	"""
+
+	frameTitulo = LabelFrame(frame)
+	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10))
+
+	lblTitulo = Label(frameTitulo, text='Configurações do aplicativo')
+	lblTitulo.pack(fill=BOTH,expand=1)
+
+	appConfigFrame = LabelFrame(frame)
+	appConfigFrame.pack(fill=BOTH,expand=1)
+
+	lblJanelaDefault = Label(appConfigFrame, text='Iniciar na janela:')
+	lblJanelaDefault.grid(row=0,column=0)
+
+	janelas = ['Cores', 'Efeitos', 'Lightpaint', 'DancyPi', 'Neon', 'Server LED', 'Configurações', '-- Aplicativo']
+
+	cbxJanelaDefault = Combobox(appConfigFrame)
+	cbxJanelaDefault['values'] = janelas
+	cbxJanelaDefault.grid(row=0,column=1)
 
 
 def construir_configuracoes(self, frame):
@@ -128,7 +191,7 @@ def construir_configuracoes(self, frame):
 		cbxPinosLED.set(config.led[linha]['pino'])
 		cbxPinosLED.grid(row=linha,column=4, padx=(0,10))
 
-		lblQtdPixelsLED = Label(ledsConfigFrame, text='Quantidade')
+		lblQtdPixelsLED = Label(ledsConfigFrame, text='Pixels')
 		lblQtdPixelsLED['state'] = estado_widgets		
 		lblQtdPixelsLED.grid(row=linha,column=5)
 
