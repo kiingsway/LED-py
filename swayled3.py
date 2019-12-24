@@ -28,6 +28,9 @@ except ImportError:
 
 class Aplicativo:
 
+	def alterar_UDP(self):
+		self.tvwMenu.item('serverLED', values=('ServerLED', 'A'))
+
 	def mudar_tela(self, app_iniciando=False):
 		def fechar_todas_as_telas():
 			self.frameConfig.grid_remove()
@@ -46,7 +49,7 @@ class Aplicativo:
 			fechar_todas_as_telas()
 			self.frameServerled.grid(row=1,column=1,sticky=N)
 
-		elif menu_selecionado == 'app':
+		elif menu_selecionado == 'Aplicativo':
 			fechar_todas_as_telas()
 			self.frameConfigApp.grid(row=1,column=1,sticky=N)
 
@@ -63,16 +66,27 @@ class Aplicativo:
 		frameMenu = Frame(principal, width=60, height=30)
 		frameMenu.grid(row=1, column=0, sticky=N+W, padx=10)
 
-		self.tvwMenu = Treeview(frameMenu, height=8)
-		self.tvwMenu.column('#0', width=125)
-		self.tvwMenu.insert('', 'end', 'cores', text='Cores')
-		self.tvwMenu.insert('', 'end', 'efeitos', text='Efeitos')
-		self.tvwMenu.insert('', 'end', 'lightpaint', text='Lightpaint')
-		self.tvwMenu.insert('', 'end', 'dancypi', text='DancyPi')
-		self.tvwMenu.insert('', 'end', 'neon', text='Neon')
-		self.tvwMenu.insert('', 'end', 'ServerLED', text='Server LED')
-		self.tvwMenu.insert('', 'end', 'Configurações', text='Configurações')
-		self.tvwMenu.insert('Configurações', 'end', 'app', text='Aplicativo')
+		self.tvwMenu = Treeview(frameMenu, height=8, columns=('Menu', 'Status'), show="tree")
+		self.tvwMenu.column('#0', width=0)
+		self.tvwMenu.column('Menu', width=100)
+		self.tvwMenu.column('Status', width=50)
+		menus = ['Cores', 'Efeitos', 'Neon', 'Lightpaint', 'DancyPi', 'ServerLED', 'Configurações', 'Aplicativo']
+
+		for menu in menus:
+			if menu == 'Aplicativo':
+				self.tvwMenu.insert('Configurações', 'end', menu, values=(menu))
+				continue
+			self.tvwMenu.insert('', 'end', menu, values=(menu))
+
+
+		# self.tvwMenu.insert('', 'end', 'cores', values='Cores')
+		# self.tvwMenu.insert('', 'end', 'efeitos', values='Efeitos')
+		# self.tvwMenu.insert('', 'end', 'neon', values='Neon')
+		# self.tvwMenu.insert('', 'end', 'lightpaint', values='Lightpaint')
+		# self.tvwMenu.insert('', 'end', 'dancypi', values='DancyPi')
+		# self.tvwMenu.insert('', 'end', 'ServerLED', values='Server LED')
+		# self.tvwMenu.insert('', 'end', 'Configurações', values='Configurações')
+		# self.tvwMenu.insert('Configurações', 'end', 'app', values='Aplicativo')
 		self.tvwMenu.bind('<<TreeviewSelect>>', lambda x: self.mudar_tela())
 		self.tvwMenu.grid(row=1, column=0)
 
@@ -87,7 +101,7 @@ class Aplicativo:
 		# Função para construir o menu do aplicativo e as configurações
 		self.construir_menu()
 		construir_configuracoes(principal, self.frameConfig)
-		construir_serverled(principal, self.frameServerled)
+		construir_serverled(principal, self.frameServerled, Aplicativo)
 		construir_config_app(principal, self.frameConfigApp)
 
 		self.mudar_tela(app_iniciando=True)

@@ -74,7 +74,11 @@ class CreateToolTip(object):
         if tw:
             tw.destroy()
 
-def construir_serverled(self, frame):
+class funcionalidades:
+	def iniciar_UDP(self):
+		print('Iniciando conexão UDP...')
+
+def construir_serverled(self, frame, app):
 	""" Função para construir a tela do serverLED. A comunicação via UDP
 	"""
 
@@ -117,6 +121,7 @@ def construir_serverled(self, frame):
 	txtPorta.grid(row=0,column=3)
 
 	btnIniciarUDP = Button(frameUDP, text='Iniciar comunicação...')
+	btnIniciarUDP['command'] = lambda: funcionalidades.iniciar_UDP(app)
 	btnIniciarUDP.grid(row=1,column=0, columnspan=5, sticky=W+E)
 
 def construir_config_app(self, frame):
