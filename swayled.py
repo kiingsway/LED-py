@@ -306,17 +306,18 @@ def testLED(event=0):
         testThread = threading.Thread(target=megaman,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
         testThread.start()
 
+
 def outros_efeitos():
     efeito = v.get()
-    if efeito == "0":
-        print("Desliguei o rainbowCycle")
+
+    if efeito == "0" and globals.outrosEfeitos_old != 0:
         globals.outroEfeitoRainbow = False
-    if efeito == "1":
-        print("Tentando entrar no rainbowCycle",end=' ')
+        globals.outrosEfeitos_old = 0
+    if efeito == "1" and globals.outrosEfeitos_old != 1:
         outroEfeitoThread = threading.Thread(target=rainbowCycle)
         globals.outroEfeitoRainbow = True
-        print('globals.outroEfeitoRainbow = {}'.format(globals.outroEfeitoRainbow))
         outroEfeitoThread.start()
+        globals.outrosEfeitos_old = 1
 
 def desligar():
     try: off()
@@ -410,8 +411,6 @@ menu.add_cascade(label='Arquivo', menu=sel_menu)
 sel_menu = Menu(menu,tearoff=False)
 sel_menu.add_command(label='LightPaint',command=janelaLightpaint)
 menu.add_cascade(label='Efeitos', menu=sel_menu)
-
-
 
 frameWindow = Frame(window, relief=GROOVE)
 frameWindow.grid(column=0,row=0)

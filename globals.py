@@ -14,3 +14,5 @@ reverter_x = False
 reverter_y = False
 
 outroEfeitoRainbow = False
+
+outrosEfeitos_old = None
