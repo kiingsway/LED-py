@@ -1,505 +1,114 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+''' Feito por Marcos Oranmiyan.
+Aqui controlamos LEDs ws2812x e 5050.
+'''
+
+# Importa a declaração print como uma função no Python 2.
 from __future__ import print_function
 
-print("Importando bibliotecas comuns...")
 import os
 import sys
-import time
-import random
-import globals
-import argparse
-import threading
-import platform
-from decimal import *
-from itertools import product
-from functools import partial
-
-erros = []
-
-def addErros(classe,codigo,erro):
-	erros.append(dict(tituloErro=classe,
-    codigoProblematico=codigo,
-    erroPython=erro))
-print("Importando bibliotecas dos LEDs...")
-
-try: from Tkinter import *
-except ImportError: from tkinter import *
-except Exception: addErros((str(sys.exc_info()[0])+': Tkinter está instalado?'),'from Tkinter import *',sys.exc_info()[1])
-
-try: import ttk
-except ImportError: import tkinter.ttk as ttk
-except Exception: addErros((str(sys.exc_info()[0])+': ttk está instalado?'),'from Tkinter import *',sys.exc_info()[1])
-
-try: import tkMessageBox
-except ImportError: import tkinter.messagebox as tkMessageBox
-
-try: from tkColorChooser import askcolor
-except ImportError: from tkinter.colorchooser import askcolor
-
-try: import tkFileDialog
-except ImportError: import tkinter.filedialog as tkFileDialog
-except: addErros("tkinter instalado?","try: import tkFileDialog",sys.exc_info()[1])
-
-try: from effects import *
-except ImportError: addErros('ImportError: O arquivo efeitos.py está na pasta do código?','from effects import *',sys.exc_info()[1])
-except NotImplementedError:	addErros('NotImplementedError: Erro na importação da biblioteca effects.py','from effects import *',sys.exc_info()[1])
-
-try: from effectsBeta import *
-except ImportError: addErros('ImportError: O arquivo efeitosBeta.py está na pasta do código?','from effectsBeta import *',sys.exc_info()[1])
-except NotImplementedError:	addErros('NotImplementedError: Erro no código da biblioteca effectsBeta.py','from effectsBeta import *',sys.exc_info()[1])
-
-try: from lightpaint import lightpainting as lp
-except ImportError: addErros('ImportError: O arquivo lightpaint.py está na pasta do código?','from effectsBeta import *',sys.exc_info()[1])
-except NotImplementedError: addErros('NotImplementedError: Erro no código da biblioteca lightpaint.py','import lightpaint',sys.exc_info()[1])
-
-try: from led5050 import *
-except NotImplementedError:	addErros('NotImplementedError: Erro no código da biblioteca led5050.py','try: from led5050 import *',sys.exc_info()[1])
-except ModuleNotFoundError: addErros('ModuleNotFoundError: Um módulo não foi executado','from led5050 import *',sys.exc_info()[1])
-except ImportError: addErros('ImportError: O arquivo led5050.py está na pasta do código?','try: from led5050 import *',sys.exc_info()[1])
-except Exception: addErros(sys.exc_info()[0],'from Tkinter import *',sys.exc_info()[1])
-
-# Lightpainting
-try: from PIL import ImageTk, Image
-except: print('Sem bibliotecas de imagem. Instale-as com: pip install Pillow')
-
-print('Carregando funções...')
-
-def autoscroll(sbar, first, last):
-    """Hide and show scrollbar as needed."""
-    first, last = float(first), float(last)
-    if first <= 0 and last >= 1:
-        sbar.grid_remove()
-    else:
-        sbar.grid()
-    sbar.set(first, last)
-
-
-def janelaLightpaint():
-    tam_base = 300
-
-    janelaParaLightpaint = Toplevel(window)
-    janelaParaLightpaint.title('Lightpaint')
-    janelaParaLightpaint.geometry('800x400')
-
-
-
-    def frame_maismenos(aumentar):
-        if aumentar:
-            if globals.taxa_frame < 1000:
-                globals.taxa_frame += 100
-                lblFrame.delete(0,END)
-                lblFrame.insert(0,globals.taxa_frame)
-        else:
-            if globals.taxa_frame > 100:
-                globals.taxa_frame -= 100
-                lblFrame.delete(0,END)
-                lblFrame.insert(0,globals.taxa_frame)
-
-
-    def coluna_maismenos(aumentar):
-        if aumentar:
-            if globals.taxa_coluna < 10:
-                globals.taxa_coluna += 1
-                lblColuna.delete(0,END)
-                lblColuna.insert(0,globals.taxa_coluna)
-        else:
-            if globals.taxa_coluna > 1:
-                globals.taxa_coluna -= 1
-                lblColuna.delete(0,END)
-                lblColuna.insert(0,globals.taxa_coluna)
-
-    def trocar_velocidade():
-        globals.taxa_frame = int(lblFrame.get())
-        globals.taxa_coluna = int(lblColuna.get())
-
-    def abrir_imagem():
-        def miniatura(img_mini):
-            alt = img_mini.size[0]
-            lar = img_mini.size[1]
-            if alt >= tam_base or lar >= tam_base:
-                if alt > lar:
-                    proporcao = alt / tam_base
-                elif lar >= alt:
-                    proporcao = lar / tam_base
-                nova_alt = alt / proporcao
-                nova_lar = lar / proporcao
-                img_mini = img_mini.resize((int(nova_alt),int(nova_lar)), Image.ANTIALIAS)
-            return img_mini
-
-        if platform.system() == "Windows": local_arquivo = tkFileDialog.askopenfilename(initialdir = "Z:\\Projetos\\LED-py\\Images",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
-        else: local_arquivo = tkFileDialog.askopenfilename(initialdir = "/home/pi/Projetos/LED-py/Images",title = "Select file",filetypes = (("Imagens","*.jpg *.png *.gif"),("Todos os arquivos","*.*")))
-        txtImagem.delete(0,END)
-        txtImagem.insert(0,local_arquivo.split('/')[-1])
-        try:
-            globals.imagem_arquivo = Image.open(local_arquivo).convert("RGB")
-            imgTk = ImageTk.PhotoImage(miniatura(globals.imagem_arquivo))
-            lblImagem.config(image=imgTk)
-            lblImagem.image = imgTk
-            lightpaintingThread = threading.Thread(target=lp)
-            lightpaintingThread.start()
-            globals.lpLigado = True
-        except AttributeError: print('Upload da imagem cancelado')
-
-    def play_pausePainting():
-        if globals.lpLigado:
-            lp.parar_painting = True
-            btnPl.config(text='Tocar')
-            globals.lpLigado = False
-        else:
-            lightpaintingThread = threading.Thread(target=lp)
-            lightpaintingThread.start()
-            btnPl.config(text='Pausar')
-            globals.lpLigado = True
-
-    def reverter(alvo):
-        if alvo == 'x':
-            if ckb1.get() == 1:
-                globals.reverter_x = True
-            else:
-                globals.reverter_x = False
-        if alvo == 'y':
-            if ckb2.get() == 1:
-                globals.reverter_y = True
-            else:
-                globals.reverter_y = False
-
-    
-
-
-    frame_campos1 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
-    frame_campos1.grid(column=0,row=0)
-
-    txtImagem = Entry(frame_campos1,width=40)
-    txtImagem.grid(column=0,row=0)
-    Button(frame_campos1,text='Escolher imagem...',command=abrir_imagem).grid(column=1,row=0)
-    btnPl = Button(frame_campos1,text='Pausar',command= lambda: play_pausePainting())
-    btnPl.grid(column=2,row=0)
-
-    frame_campos2 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
-    frame_campos2.grid(column=0,row=1)
-
-    Label(frame_campos2,text='Taxa Frame:').grid(column=0,row=0)
-    Button(frame_campos2,text='-',command=lambda:frame_maismenos(False)).grid(column=1,row=0)
-    lblFrame = Entry(frame_campos2,width=5)
-    lblFrame.insert(0,globals.taxa_frame)
-    lblFrame.grid(column=2,row=0)
-    Button(frame_campos2,text='+',command=lambda:frame_maismenos(True)).grid(column=3,row=0)
-    Button(frame_campos2,text='Trocar velocidade',command=trocar_velocidade).grid(column=4,row=0)
-
-    frame_campos3 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
-    frame_campos3.grid(column=0,row=2)
-
-    Label(frame_campos3,text='Taxa Coluna:').grid(column=0,row=0)
-    Button(frame_campos3,text='-',command=lambda:coluna_maismenos(False)).grid(column=1,row=0)
-    lblColuna = Entry(frame_campos3,width=5)
-    lblColuna.insert(0,globals.taxa_coluna)
-    lblColuna.grid(column=2,row=0)
-    Button(frame_campos3,text='+',command=lambda:coluna_maismenos(True)).grid(column=3,row=0)
-    Button(frame_campos3,text='Trocar velocidade',command=trocar_velocidade).grid(column=4,row=0)
-
-    frame_campos4 = Frame(janelaParaLightpaint,relief=RAISED,bd=5)
-    frame_campos4.grid(column=0,row=3)
-
-    ckb1 = IntVar()
-    ckb2 = IntVar()
-    Checkbutton(frame_campos4, text='Reverter X', variable=ckb1, command=lambda:reverter('x') ).grid(row=0,column=0)
-    Checkbutton(frame_campos4, text='Reverter Y', variable=ckb2, command=lambda:reverter('y') ).grid(row=0,column=1)
-
-    frame_imagepicker = Frame(janelaParaLightpaint,padx=10, pady=10,relief=RAISED,bd=5)
-    frame_imagepicker.grid(column=1,row=0,rowspan=4)
-
-    lblImagem = Label(frame_imagepicker, width=tam_base,height=tam_base)
-    lblImagem.grid(column=1,row=0)
-    abrir_imagem()
-
-def janelaErros():
-
-    janelaParaErros = Toplevel(window)
-    janelaParaErros.title("Erros Sway LED")
-    
-    #   Barras horizontais
-    vsb = ttk.Scrollbar(orient="vertical")
-    hsb = ttk.Scrollbar(orient="horizontal")
-
-    #   Objeto Treeview
-    tree = ttk.Treeview(janelaParaErros, columns=("codigoProblematico","erroPython"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
-    xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
-
-    #   Barras de scroll às vistas x e y do objeto Treeview
-    vsb['command'] = tree.yview
-    hsb['command'] = tree.xview
-
-    #   Cabeçalhos das diferentes colunas
-    tree.heading("#0", text="Erro", anchor='w')
-    tree.heading("codigoProblematico", text="Parte do código", anchor='w')
-    tree.heading("erroPython", text="Erro Python", anchor='w')
-    tree.column("#0", stretch=0, width=500)
-    tree.column("codigoProblematico", stretch=0, width=200)
-    tree.column("erroPython", stretch=0, width=200)
-
-    #   Inserção na treeview
-    for i in range(len(erros)):
-    	tree.insert('', 'end', text=erros[i]["tituloErro"], values=[erros[i]["codigoProblematico"], erros[i]["erroPython"]])
-
-    # Arrange the tree and its scrollbars in the toplevel
-    tree.grid(column=0, row=0, sticky='nswe')
-    vsb.grid(column=1, row=0, sticky='ns')
-    hsb.grid(column=0, row=1, sticky='ew')
-    janelaParaErros.grid_columnconfigure(0, weight=1)
-    janelaParaErros.grid_rowconfigure(0, weight=1)
-
-def validateFields():
-    if txtPontoA.get() == '':
-        tkMessageBox.showinfo("Entrada necessaria", "Qual LED eu ligo? Ponto A necessario")
-        return False
-    return True
-
-def testLED(event=0):
-    if not validateFields(): return
-
-    globals.outroEfeitoRainbow = False
-
-    pontoA = int(txtPontoA.get())
-    if txtPontoB.get() == '': pontoB = pontoA
-    else: pontoB = int(txtPontoB.get())
-    if txtR.get() == '': redLed = 0
-    else: redLed = int(txtR.get())
-    if txtG.get() == '': greenLed = 0
-    else: greenLed = int(txtG.get())
-    if txtB.get() == '': blueLed = 0
-    else: blueLed = int(txtB.get())
-    if txtVel.get() == '': vel = 0.1
-    else: vel = float(txtVel.get())
-
-    if txtFuncao1.get() == '': funcao1 = 3
-    else: funcao1 = int(txtFuncao1.get())
-
-    if cmbEffects.current() == 0:
-        testThread = threading.Thread(target=acenderLEDEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,))
-        testThread.start()
-    if cmbEffects.current() == 1:
-        testThread = threading.Thread(target=simpleBassEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
-        testThread.start()
-    if cmbEffects.current() == 2:
-        testThread = threading.Thread(target=bassBracoEffectBETA,args=(pontoB/10,redLed,greenLed,blueLed,vel,))
-        testThread.start()
-    if cmbEffects.current() == 3:
-        testThread = threading.Thread(target=corteCobraEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1,))
-        testThread.start()
-    if cmbEffects.current() == 4:
-        testThread = threading.Thread(target=laserLeftEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1,))
-        testThread.start()
-    if cmbEffects.current() == 5:
-        testThread = threading.Thread(target=corteEffectBETA,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,))
-        testThread.start()
-    if cmbEffects.current() == 6:
-        testThread = threading.Thread(target=teatroEffect,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel,funcao1))
-        testThread.start()
-    if cmbEffects.current() == 7:
-        testThread = threading.Thread(target=posAleatoriaFade,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
-        testThread.start()
-    if cmbEffects.current() == 8:
-        testThread = threading.Thread(target=bassBracoInvertEffect2,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
-        testThread.start()
-    if cmbEffects.current() == 9:
-        testThread = threading.Thread(target=megaman,args=(pontoA,pontoB,redLed,greenLed,blueLed,vel))
-        testThread.start()
-
-
-def outros_efeitos():
-    efeito = v.get()
-
-    if efeito == "0" and globals.outrosEfeitos_old != 0:
-        globals.outroEfeitoRainbow = False
-        globals.outrosEfeitos_old = 0
-    if efeito == "1" and globals.outrosEfeitos_old != 1:
-        outroEfeitoThread = threading.Thread(target=rainbowCycle)
-        globals.outroEfeitoRainbow = True
-        outroEfeitoThread.start()
-        globals.outrosEfeitos_old = 1
-
-def desligar():
-    try: off()
-    except: pass
-
-def colorPicker_w2812b():
-    color = askcolor()
-    rPicker = int(color[0][0])
-    gPicker = int(color[0][1])
-    bPicker = int(color[0][2])
-
-    txtR.delete(0,END)
-    txtR.insert(0,rPicker)	
-    txtG.delete(0,END)
-    txtG.insert(0,gPicker)
-    txtB.delete(0,END)
-    txtB.insert(0,bPicker)
-
-    labelTroca_de_Cores(rPicker,gPicker,bPicker)
-
-def label_trocarCores(sv):
-    if txtR.get() == '': corVermelha = 0
-    else: corVermelha = int(txtR.get())
-    if txtG.get() == '': corVerde = 0
-    else: corVerde = int(txtG.get())
-    if txtB.get() == '': corAzul = 0
-    else: corAzul = int(txtB.get())
-    labelTroca_de_Cores(corVermelha, corVerde, corAzul)
-
-def labelTroca_de_Cores(R,G,B):
-    novas_cores = "#%0.2X%0.2X%0.2X" % (R,G,B)
-    # lblCores.config(bg=novas_cores)
-    try: lblCores.config(bg=novas_cores)
-    except TclError: print ("Cor inválida: R:{} G:{} B:{} {}".format(R,G,B,novas_cores))
-
-def colorPicker_5050():
-    color = askcolor()
-    try: fitaLed(color[0][0],color[0][1],color[0][2])
-    except: print ("LEDs 5050 (não endereçáveis) não foi adicionado")
-
-def mostrarTxtFuncao(x):
-    if cmbEffects.current() == 3:
-        lblFuncao1.config(text = "Tamanho:")
-        lblFuncao1.grid()
-        txtFuncao1.grid()
-
-    elif cmbEffects.current() == 4:
-        lblFuncao1.config(text = "Duração:")
-        lblFuncao1.grid()
-        txtFuncao1.grid()
-
-    elif cmbEffects.current() == 6:
-        lblFuncao1.config(text = "Duração:")
-        lblFuncao1.grid()
-        txtFuncao1.grid()
-
-    else:
-        lblFuncao1.grid_remove()
-        txtFuncao1.grid_remove()
-
-def reiniciar_app(event=0):
-    """Restarts the current program.
-    Note: this function does not return. Any cleanup action (like
-    saving data) must be done before calling this function."""
-    python = sys.executable
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print("App reiniciado")
-    os.execl(python, python, * sys.argv)
-
-window = Tk()
-try: window.iconbitmap("swayled.ico")
-except: addErros('_tkinter.TclError','window.iconbitmap("swayled.ico")',sys.exc_info()[1])
-
-def character_limit(entry_text, limit_char):
-    if len(entry_text.get()) > limit_char:
-        entry_text.delete(limit_char,END)
-
-print('Carregando programa...')
-
-menu = Menu(window)
-sel_menu = Menu(menu,tearoff=False)
-sel_menu.add_command(label='Pegar RGB 5050',command=colorPicker_5050)
-sel_menu.add_separator()
-sel_menu.add_command(label='Desligar LEDs',command=desligar)
-sel_menu.add_separator()
-if len(erros) > 0: sel_menu.add_command(label='Erros', command=janelaErros)
-sel_menu.add_command(label='Resetar App',command=reiniciar_app,accelerator="F9")
-sel_menu.add_command(label='Sobre')
-menu.add_cascade(label='Arquivo', menu=sel_menu)
-
-sel_menu = Menu(menu,tearoff=False)
-sel_menu.add_command(label='LightPaint',command=janelaLightpaint)
-menu.add_cascade(label='Efeitos', menu=sel_menu)
-
-frameWindow = Frame(window, relief=GROOVE)
-frameWindow.grid(column=0,row=0)
-
-frameCor = Frame(frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=2)
-frameCor.grid(column=0,row=0,sticky=W+E+N+S)
-
-svR = StringVar()
-svG = StringVar()
-svB = StringVar()
-svR.trace("w", lambda name, index, mode, sv=svR: label_trocarCores(svR))
-svG.trace("w", lambda name, index, mode, sv=svG: label_trocarCores(svG))
-svB.trace("w", lambda name, index, mode, sv=svB: label_trocarCores(svB))
-svR.trace("w", lambda *args: character_limit(txtR,3))
-svG.trace("w", lambda *args: character_limit(txtG,3))
-svB.trace("w", lambda *args: character_limit(txtB,3))
-
-Label(frameCor, text="R:").grid(column=0, row=0)
-txtR = Entry(frameCor,width=5,textvariable=svR)
-txtR.grid(column=1, row=0)
-
-Label(frameCor, text="G:").grid(column=0, row=1)
-txtG = Entry(frameCor,width=5,textvariable=svG)
-txtG.grid(column=1, row=1)
-
-Label(frameCor, text="B:").grid(column=0, row=2)
-txtB = Entry(frameCor,width=5,textvariable=svB)
-txtB.grid(column=1, row=2)
-
-lblCores = Label(frameCor, text='Amostra de cores', bg="red")
-lblCores.grid(column=2, row=0, rowspan=3, sticky=W+E+N+S)
-Button(frameCor, text='Color Picker',command=colorPicker_w2812b).grid(column=0, row=3,columnspan=3, sticky=W+E)
-
-framePonto = Frame(frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=2)
-framePonto.grid(column=1,row=0,sticky=W+E+N+S)
-
-Label(framePonto, text="Ponto A:").grid(column=0, row=0)
-svPA = StringVar()
-svPA.trace("w", lambda *args: character_limit(txtPontoA,3))
-txtPontoA = Entry(framePonto,width=5,textvariable=svPA)
-txtPontoA.grid(column=1, row=0,sticky=W)
-
-Label(framePonto, text="Ponto B:").grid(column=2, row=0,sticky=E)
-svPB = StringVar()
-svPB.trace("w", lambda *args: character_limit(txtPontoB,3))
-txtPontoB = Entry(framePonto,width=5,textvariable=svPB)
-txtPontoB.grid(column=3, row=0,sticky=E)
-
-Label(framePonto, text="Vel:").grid(column=0, row=1,sticky=E)
-txtVel = Entry(framePonto,width=5)
-txtVel.grid(column=1, row=1,sticky=W)
-
-lblFuncao1 = Label(framePonto, text="Função 1:")
-lblFuncao1.grid(column=2, row=1,sticky=E)
-lblFuncao1.grid_remove()
-txtFuncao1 = Entry(framePonto,width=5)
-txtFuncao1.grid(column=3, row=1,sticky=E)
-txtFuncao1.grid_remove()
-
-lblEffects = Label(framePonto, text="Efeitos:")
-lblEffects.grid(column=0,row=2,pady=10)
-
-cmbEffects = ttk.Combobox(framePonto,width=20,state="readonly")
-cmbEffects['values']= ("0 - Ligar",
-	"1 - Grave",
-	"2 - Braco",
-	"3 - Corte Cobra",
-	"4 - Laser Esq",
-	"5 - Corte",
-	"6 - Teatro",
-	"7 - Aleatorio Fade",
-	"8 - Bass Braco Invert",
-	"9 - Teste")
-cmbEffects.current(0) #set the selected item
-cmbEffects.grid(column=1, row=2,columnspan=3)
-cmbEffects.bind("<<ComboboxSelected>>", mostrarTxtFuncao)
-
-v = StringVar()
-outrosEfeitos = [("Desligado","0"),("ArcoIris","1")]
-for outroEfeito, val in outrosEfeitos:
-    Radiobutton(framePonto,text=outroEfeito,indicatoron = 0,variable=v,value=val,relief=FLAT,command=outros_efeitos).grid(column=val,row=3)
-
-frameBotaoTocar = Frame(frameWindow, relief=GROOVE, padx=10, pady=10, borderwidth=1)
-frameBotaoTocar.grid(column=0,row=1,columnspan=2,sticky=W+E)
-
-Button(frameBotaoTocar,text='LIGHTS ON!',width=50,command=testLED).grid(column=0,row=0)
-
-window.config(menu=menu)
-window.title("Sway LED")
-window.bind_all("<F9>",reiniciar_app)
-window.bind_all("<Return>",testLED)
-window.mainloop()
+import config
+
+# Importando pythons para construir as janelas
+from sl_config import * # Configurações dos leds
+
+try:
+	# Python 3
+	from tkinter import *
+	from tkinter.ttk import Treeview
+	# from tkinter.ttk import Combobox
+except ImportError:
+	# Python 2
+	from Tkinter import *
+	from ttk import Combobox, Treeview
+
+
+class Aplicativo:
+
+	def alterar_UDP(self):
+		self.tvwMenu.item('serverLED', values=('ServerLED', 'A'))
+
+	def mudar_tela(self, app_iniciando=False):
+		def fechar_todas_as_telas():
+			self.frameConfig.grid_remove()
+			self.frameServerled.grid_remove()
+			self.frameConfigApp.grid_remove()
+
+		if app_iniciando == False: menu_selecionado = self.tvwMenu.selection()[0]
+		else: menu_selecionado = config.janelaDefault
+
+
+		if menu_selecionado == 'Configurações':
+			fechar_todas_as_telas()
+			self.frameConfig.grid(row=1,column=1,sticky=N)
+
+		elif menu_selecionado == 'ServerLED':
+			fechar_todas_as_telas()
+			self.frameServerled.grid(row=1,column=1,sticky=N)
+
+		elif menu_selecionado == 'Aplicativo':
+			fechar_todas_as_telas()
+			self.frameConfigApp.grid(row=1,column=1,sticky=N)
+
+		else:
+			fechar_todas_as_telas()
+
+
+	def construir_menu(self):
+		''' Definição usada para construir o menu do app.
+		'''
+		lblMenu = Label(principal,text='Menu:')
+		lblMenu.grid(row=0, column=0, sticky=W, padx=10)
+
+		frameMenu = Frame(principal, width=60, height=30)
+		frameMenu.grid(row=1, column=0, sticky=N+W, padx=10)
+
+		self.tvwMenu = Treeview(frameMenu, height=8, columns=('Menu', 'Status'), show="tree")
+		self.tvwMenu.column('#0', width=0)
+		self.tvwMenu.column('Menu', width=100)
+		self.tvwMenu.column('Status', width=50)
+		menus = ['Cores', 'Efeitos', 'Neon', 'Lightpaint', 'DancyPi', 'ServerLED', 'Configurações', 'Aplicativo']
+
+		for menu in menus:
+			if menu == 'Aplicativo':
+				self.tvwMenu.insert('Configurações', 'end', menu, values=(menu))
+				continue
+			self.tvwMenu.insert('', 'end', menu, values=(menu))
+
+
+		# self.tvwMenu.insert('', 'end', 'cores', values='Cores')
+		# self.tvwMenu.insert('', 'end', 'efeitos', values='Efeitos')
+		# self.tvwMenu.insert('', 'end', 'neon', values='Neon')
+		# self.tvwMenu.insert('', 'end', 'lightpaint', values='Lightpaint')
+		# self.tvwMenu.insert('', 'end', 'dancypi', values='DancyPi')
+		# self.tvwMenu.insert('', 'end', 'ServerLED', values='Server LED')
+		# self.tvwMenu.insert('', 'end', 'Configurações', values='Configurações')
+		# self.tvwMenu.insert('Configurações', 'end', 'app', values='Aplicativo')
+		self.tvwMenu.bind('<<TreeviewSelect>>', lambda x: self.mudar_tela())
+		self.tvwMenu.grid(row=1, column=0)
+
+
+	def __init__(self, master=None):
+		
+		# Frames para serem mostrados
+		self.frameConfig = Frame(principal)
+		self.frameServerled = Frame(principal)
+		self.frameConfigApp = Frame(principal)
+
+		# Função para construir o menu do aplicativo e as configurações
+		self.construir_menu()
+		construir_configuracoes(principal, self.frameConfig)
+		construir_serverled(principal, self.frameServerled, Aplicativo)
+		construir_config_app(principal, self.frameConfigApp)
+
+		self.mudar_tela(app_iniciando=True)
+
+principal = Tk()
+Aplicativo(principal)
+# principal.geometry("722x399")
+# principal.minsize(722, 399)
+principal.title('Sway LED')
+principal.mainloop()
