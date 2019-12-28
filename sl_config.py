@@ -78,18 +78,80 @@ class funcionalidades:
 	def iniciar_UDP(self):
 		print('Iniciando conexão UDP...')
 
+def construir_cores(self, frame, linha = 5, coluna = 3):
+	""" Função para construir a tela de cores únicas para enviar aos LEDs
+	"""
+
+	frameTitulo = LabelFrame(frame)
+	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	lblTitulo = Label(frameTitulo, text='Clique nas cores para mudar a fita LED')
+	lblTitulo.pack(fill=BOTH,expand=1)
+
+	frameCoresBtn = LabelFrame(frame)
+	frameCoresBtn.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	c = 0
+	l = 0
+
+	for i in range(linha*coluna):
+		btnCor = Button(frameCoresBtn, bg='#00ff00', width=3, height=1)
+		btnCor.grid(row=l, column=c, padx=10,pady=10)
+		l += 1
+		if i != 0 and (i+1) % linha == 0:
+			c += 1
+			l = 0
+		if i == len(range(linha*coluna))-1:
+			btnCor = Button(frameCoresBtn, bg='#fff', width=3, height=1)
+			btnCor.grid(row=l, column=c, padx=10,pady=10)
+
+	frameCoresScale = LabelFrame(frame)
+	frameCoresScale.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	slrR = Scale(frameCoresScale, from_=0, to=255, sliderlength=15)
+	slrG = Scale(frameCoresScale, from_=0, to=255, sliderlength=15)
+	slrB = Scale(frameCoresScale, from_=0, to=255, sliderlength=15)
+	slrW = Scale(frameCoresScale, from_=0, to=100, sliderlength=15)
+
+	slrR.grid(row=0,column=0)
+	slrG.grid(row=0,column=1)
+	slrB.grid(row=0,column=2)
+	slrW.grid(row=0,column=3)
+
+def construir_efeitos(self, frame):
+	""" Função para construir a tela de efeitos
+	"""
+
+	frameTitulo = LabelFrame(frame)
+	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	lblTitulo = Label(frameTitulo, text='Selecione um efeito para ver a mágica acontecer')
+	lblTitulo.pack(fill=BOTH,expand=1)
+
+	frameEfeitos = LabelFrame(frame)
+	frameEfeitos.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	efeitos = [('Desligado','0'),('Arco íris','1')]
+
+	for efeito, val in efeitos:
+		Radiobutton(frameEfeitos, text=efeito, indicatoron = 0, value=val, relief=FLAT).pack(fill=BOTH,expand=1,pady=5,padx=5)
+
+
+
+
+
 def construir_serverled(self, frame, app):
 	""" Função para construir a tela do serverLED. A comunicação via UDP
 	"""
 
 	frameTitulo = LabelFrame(frame)
-	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10))
+	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
 
 	lblTitulo = Label(frameTitulo, text='Comunicação via UDP para outro dispositivo')
 	lblTitulo.pack(fill=BOTH,expand=1)
 
 	frameClienteServidor = LabelFrame(frame)
-	frameClienteServidor.pack(fill=BOTH,expand=1)
+	frameClienteServidor.pack(fill=BOTH,expand=1,padx=(0,10))
 
 	opcoesClienteServidor = ['Vou usar esse app para enviar os LEDs', 'Vou receber e ligar os LEDs nesse app']
 
@@ -104,7 +166,7 @@ def construir_serverled(self, frame, app):
 	cbxCliServ.pack(fill=BOTH,expand=1)
 
 	frameUDP = LabelFrame(frame, text='Rede')
-	frameUDP.pack(fill=BOTH,expand=1)
+	frameUDP.pack(fill=BOTH,expand=1,padx=(0,10))
 
 	lblIP = Label(frameUDP, text='IP:')
 	lblIP.grid(row=0,column=0)
@@ -129,13 +191,13 @@ def construir_config_app(self, frame):
 	"""
 
 	frameTitulo = LabelFrame(frame)
-	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10))
+	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
 
 	lblTitulo = Label(frameTitulo, text='Configurações do aplicativo')
 	lblTitulo.pack(fill=BOTH,expand=1)
 
 	appConfigFrame = LabelFrame(frame)
-	appConfigFrame.pack(fill=BOTH,expand=1)
+	appConfigFrame.pack(fill=BOTH,expand=1,padx=(0,10))
 
 	lblJanelaDefault = Label(appConfigFrame, text='Iniciar na janela:')
 	lblJanelaDefault.grid(row=0,column=0)
@@ -146,22 +208,21 @@ def construir_config_app(self, frame):
 	cbxJanelaDefault['values'] = janelas
 	cbxJanelaDefault.grid(row=0,column=1)
 
-
 def construir_configuracoes(self, frame):
 	""" Função para construir a tela das configurações.
 	"""
 
 	frameConfigTitulo = LabelFrame(frame)
-	frameConfigTitulo.pack(fill=BOTH,expand=1)
+	frameConfigTitulo.pack(fill=BOTH,expand=1,padx=(0,10))
 
 	lblConfigTitulo = Label(frameConfigTitulo, text='Configurações dos LEDs e informações de energia')
 	lblConfigTitulo.pack(fill=BOTH,expand=1)
 
 	ledsConfigFrame = LabelFrame(frame, text='LEDs')
-	ledsConfigFrame.pack(fill=BOTH,expand=1)
+	ledsConfigFrame.pack(fill=BOTH,expand=1,padx=(0,10))
 
 	ledsEnergiaFrame = LabelFrame(frame, text='Energia (informações adicionais)')
-	ledsEnergiaFrame.pack(fill=BOTH,expand=1)
+	ledsEnergiaFrame.pack(fill=BOTH,expand=1,padx=(0,10))
 
 	tipos_de_leds = ['ws2812b', '5050']
 	pinos_dos_leds = ['18']

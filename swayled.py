@@ -36,26 +36,19 @@ class Aplicativo:
 			self.frameConfig.grid_remove()
 			self.frameServerled.grid_remove()
 			self.frameConfigApp.grid_remove()
+			self.frameCores.grid_remove()
+			self.frameEfeitos.grid_remove()
 
 		if app_iniciando == False: menu_selecionado = self.tvwMenu.selection()[0]
 		else: menu_selecionado = config.janelaDefault
 
+		fechar_todas_as_telas()
 
-		if menu_selecionado == 'Configurações':
-			fechar_todas_as_telas()
-			self.frameConfig.grid(row=1,column=1,sticky=N)
-
-		elif menu_selecionado == 'ServerLED':
-			fechar_todas_as_telas()
-			self.frameServerled.grid(row=1,column=1,sticky=N)
-
-		elif menu_selecionado == 'Aplicativo':
-			fechar_todas_as_telas()
-			self.frameConfigApp.grid(row=1,column=1,sticky=N)
-
-		else:
-			fechar_todas_as_telas()
-
+		if menu_selecionado == 'Cores': self.frameCores.grid(row=1,column=1,sticky=N)
+		elif menu_selecionado == 'Efeitos': self.frameEfeitos.grid(row=1,column=1,sticky=N)
+		elif menu_selecionado == 'Configurações': self.frameConfig.grid(row=1,column=1,sticky=N)
+		elif menu_selecionado == 'ServerLED': self.frameServerled.grid(row=1,column=1,sticky=N)
+		elif menu_selecionado == 'Aplicativo': self.frameConfigApp.grid(row=1,column=1,sticky=N)
 
 	def construir_menu(self):
 		''' Definição usada para construir o menu do app.
@@ -64,29 +57,20 @@ class Aplicativo:
 		lblMenu.grid(row=0, column=0, sticky=W, padx=10)
 
 		frameMenu = Frame(principal, width=60, height=30)
-		frameMenu.grid(row=1, column=0, sticky=N+W, padx=10)
+		frameMenu.grid(row=1, column=0, sticky=N+W, padx=10,pady=(0,10))
 
 		self.tvwMenu = Treeview(frameMenu, height=8, columns=('Menu', 'Status'), show="tree")
 		self.tvwMenu.column('#0', width=0)
 		self.tvwMenu.column('Menu', width=100)
 		self.tvwMenu.column('Status', width=50)
-		menus = ['Cores', 'Efeitos', 'Neon', 'Lightpaint', 'DancyPi', 'ServerLED', 'Configurações', 'Aplicativo']
+		menus = ['Cores', 'Efeitos', 'Lightpaint', 'DancyPi', 'ServerLED', 'Configurações', 'Aplicativo']
 
 		for menu in menus:
 			if menu == 'Aplicativo':
 				self.tvwMenu.insert('Configurações', 'end', menu, values=(menu))
 				continue
-			self.tvwMenu.insert('', 'end', menu, values=(menu))
+			self.tvwMenu.insert('', 'end', menu, values=(menu), open=True)
 
-
-		# self.tvwMenu.insert('', 'end', 'cores', values='Cores')
-		# self.tvwMenu.insert('', 'end', 'efeitos', values='Efeitos')
-		# self.tvwMenu.insert('', 'end', 'neon', values='Neon')
-		# self.tvwMenu.insert('', 'end', 'lightpaint', values='Lightpaint')
-		# self.tvwMenu.insert('', 'end', 'dancypi', values='DancyPi')
-		# self.tvwMenu.insert('', 'end', 'ServerLED', values='Server LED')
-		# self.tvwMenu.insert('', 'end', 'Configurações', values='Configurações')
-		# self.tvwMenu.insert('Configurações', 'end', 'app', values='Aplicativo')
 		self.tvwMenu.bind('<<TreeviewSelect>>', lambda x: self.mudar_tela())
 		self.tvwMenu.grid(row=1, column=0)
 
@@ -97,12 +81,16 @@ class Aplicativo:
 		self.frameConfig = Frame(principal)
 		self.frameServerled = Frame(principal)
 		self.frameConfigApp = Frame(principal)
+		self.frameCores = Frame(principal)
+		self.frameEfeitos = Frame(principal)
 
 		# Função para construir o menu do aplicativo e as configurações
 		self.construir_menu()
 		construir_configuracoes(principal, self.frameConfig)
 		construir_serverled(principal, self.frameServerled, Aplicativo)
 		construir_config_app(principal, self.frameConfigApp)
+		construir_cores(principal, self.frameCores)
+		construir_efeitos(principal, self.frameEfeitos)
 
 		self.mudar_tela(app_iniciando=True)
 
