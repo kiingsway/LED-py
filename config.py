@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Quantas linhas terá a tabela de cores
+linhasCores = 6
+
+# Janela padrão em que o aplicativo é aberto
 janelaDefault = 'Cores'
 
-udp = {'ip': '192.168.0.31', 'porta':12000}
+#Configuração UDP
+udp = {'ip': '192.168.0.31', 'porta': 12000}
 
+# Configuração dos LEDs
 led = [{
 		'tipo': 'ws2812b',
 		'pino': '18',

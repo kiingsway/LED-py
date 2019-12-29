@@ -78,9 +78,12 @@ class funcionalidades:
 	def iniciar_UDP(self):
 		print('Iniciando conexão UDP...')
 
-def construir_cores(self, frame, linha = 5, coluna = 3):
+def construir_cores(self, frame):
 	""" Função para construir a tela de cores únicas para enviar aos LEDs
 	"""
+
+	coluna = 3
+	linha = config.linhasCores
 
 	frameTitulo = LabelFrame(frame)
 	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
@@ -88,31 +91,40 @@ def construir_cores(self, frame, linha = 5, coluna = 3):
 	lblTitulo = Label(frameTitulo, text='Clique nas cores para mudar a fita LED')
 	lblTitulo.pack(fill=BOTH,expand=1)
 
+	frameDesligarCores = LabelFrame(frame)
+	frameDesligarCores.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	btnDesligarCores = Button(frameDesligarCores, text='Desligar')
+	btnDesligarCores.pack(fill=BOTH,expand=1)
+
 	frameCoresBtn = LabelFrame(frame)
 	frameCoresBtn.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
 
 	c = 0
 	l = 0
 
-	rgb = [0xFF0000, 0x00FF00, 0x0000FF]
-	rgbAdd = [0x00FF00, 0x0000FF, 0xFF0000]
+	rgb = ['#FF0000', '#00FF00', '#0000FF']
+	add = 255/(linha-1)
 
-	bg = 0
+	def hex_to_color(h):
+		h = h.lstrip('#')
+		return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+	def color_to_hex(r,g,b):
+		return '#%02x%02x%02x' % (r, g, b)
 
 	for i in range(linha*coluna):
-		bg = rgb[c]
 
-		# print("c: {}. HEX: {}".format(c, hex(int(rgbAdd[c]/linha))))
-		add = int(rgbAdd[c]/linha)
-		print(hex(add))
-		# bg = int(bg)
-		# print(hex(bg))
+		r,g,b = hex_to_color(rgb[c])
 
+		if c == 0:
+			g += add*l
+		elif c == 1:
+			b += add*l
+		elif c == 2:
+			r += add*l
 
-		if i == 0: bg = rgb[0]
-		if i == 5: bg = rgb[1]
-		if i == 10: bg = rgb[2]
-		bg = str('#' + hex(int(bg[0]))[2:])
+		bg = color_to_hex(int(r), int(g), int(b))
+
 
 		btnCor = Button(frameCoresBtn, bg=bg, width=3, height=1)
 		btnCor.grid(row=l, column=c, padx=10,pady=10)
@@ -154,9 +166,6 @@ def construir_efeitos(self, frame):
 
 	for efeito, val in efeitos:
 		Radiobutton(frameEfeitos, text=efeito, indicatoron = 0, value=val, relief=FLAT).pack(fill=BOTH,expand=1,pady=5,padx=5)
-
-
-
 
 
 def construir_serverled(self, frame, app):
@@ -221,11 +230,23 @@ def construir_config_app(self, frame):
 	lblJanelaDefault = Label(appConfigFrame, text='Iniciar na janela:')
 	lblJanelaDefault.grid(row=0,column=0)
 
-	janelas = ['Cores', 'Efeitos', 'Lightpaint', 'DancyPi', 'Neon', 'Server LED', 'Configurações', '-- Aplicativo']
+	janelas = ['Cores', 'Efeitos', 'Lightpaint', 'DancyPi', 'Server LED', 'Configurações', '-- Aplicativo']
 
 	cbxJanelaDefault = Combobox(appConfigFrame)
 	cbxJanelaDefault['values'] = janelas
+	cbxJanelaDefault.set(config.janelaDefault)
 	cbxJanelaDefault.grid(row=0,column=1)
+
+	appConfigCoresFrame = LabelFrame(frame, text='Cores')
+	appConfigCoresFrame.pack(fill=BOTH,expand=1,padx=(0,10))
+
+	lblQtdLinhasCores = Label(appConfigCoresFrame, text='Quantas linhas na tabela de Cores:')
+	lblQtdLinhasCores.grid(row=0,column=0,sticky=S)
+
+	sclQtdLinhasCores = Scale(appConfigCoresFrame, from_=3, to=10, sliderlength=15, orient=HORIZONTAL)
+	sclQtdLinhasCores.set(config.linhasCores)
+	sclQtdLinhasCores.grid(row=0,column=1)
+
 
 def construir_configuracoes(self, frame):
 	""" Função para construir a tela das configurações.
