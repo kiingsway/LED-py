@@ -94,8 +94,27 @@ def construir_cores(self, frame, linha = 5, coluna = 3):
 	c = 0
 	l = 0
 
+	rgb = [0xFF0000, 0x00FF00, 0x0000FF]
+	rgbAdd = [0x00FF00, 0x0000FF, 0xFF0000]
+
+	bg = 0
+
 	for i in range(linha*coluna):
-		btnCor = Button(frameCoresBtn, bg='#00ff00', width=3, height=1)
+		bg = rgb[c]
+
+		# print("c: {}. HEX: {}".format(c, hex(int(rgbAdd[c]/linha))))
+		add = int(rgbAdd[c]/linha)
+		print(hex(add))
+		# bg = int(bg)
+		# print(hex(bg))
+
+
+		if i == 0: bg = rgb[0]
+		if i == 5: bg = rgb[1]
+		if i == 10: bg = rgb[2]
+		bg = str('#' + hex(int(bg[0]))[2:])
+
+		btnCor = Button(frameCoresBtn, bg=bg, width=3, height=1)
 		btnCor.grid(row=l, column=c, padx=10,pady=10)
 		l += 1
 		if i != 0 and (i+1) % linha == 0:
