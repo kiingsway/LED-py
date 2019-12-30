@@ -5,7 +5,7 @@
 linhasCores = 6
 
 # Janela padrão em que o aplicativo é aberto
-janelaDefault = 'Cores'
+janelaDefault = 'Lightpaint'
 
 #Configuração UDP
 udp = {'ip': '192.168.0.31', 'porta': 12000}

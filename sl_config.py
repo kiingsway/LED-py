@@ -78,10 +78,70 @@ class funcionalidades:
 	def iniciar_UDP(self):
 		print('Iniciando conexão UDP...')
 
+def construir_lightpaint(self, frame):
+
+	frameTitulo = LabelFrame(frame)
+	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	lblTitulo = Label(frameTitulo, text='Para ver esse efeito é necessário uma camera com\najuste de velocidade de disparo e um local escuro')
+	lblTitulo.pack(fill=BOTH,expand=1)
+
+	framePlayPauseLp = LabelFrame(frame)
+	framePlayPauseLp.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	btnPlayPauseLp = Button(framePlayPauseLp, text='Selecione a imagem.../Rodar/Pausar')
+	btnPlayPauseLp.pack(fill=BOTH,expand=1)
+
+	frameImagem = LabelFrame(frame, text='Imagem')
+	frameImagem.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	lblImagem = Label(frameImagem)
+	lblImagem.pack(fill=BOTH, expand=1)
+
+	txtNomeImagem = Entry(frameImagem)
+	txtNomeImagem.pack(fill=BOTH,expand=1)
+
+	btnAlterarImagem = Button(frameImagem, text='Selecionar imagem...')
+	btnAlterarImagem.pack(fill=BOTH,expand=1)
+
+	frameConfiguracoesLightpaint = LabelFrame(frame, text='Configurações')
+	frameConfiguracoesLightpaint.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	lblVelFrame = Label(frameConfiguracoesLightpaint, text='Velocidade do frame:')
+	lblVelFrame.grid(row=0,column=0, sticky=S)
+
+	sclVelFrame = Scale(frameConfiguracoesLightpaint, from_=0, to=100, sliderlength=15, orient=HORIZONTAL)
+	sclVelFrame.grid(row=0,column=1, sticky=W+E)
+
+	lblVelFrame = Label(frameConfiguracoesLightpaint, text='Velocidade da coluna:')
+	lblVelFrame.grid(row=1,column=0, sticky=S)
+
+	sclVelFrame = Scale(frameConfiguracoesLightpaint, from_=0, to=100, sliderlength=15, orient=HORIZONTAL)
+	sclVelFrame.grid(row=1,column=1, sticky=W+E)
+
+	Checkbutton(frameConfiguracoesLightpaint, text='Inverter X').grid(row=2,column=0)
+	Checkbutton(frameConfiguracoesLightpaint, text='Inverter Y').grid(row=2,column=1)
+
+def construir_dancyPi(self, frame):
+
+	frameTitulo = LabelFrame(frame)
+	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	lblTitulo = Label(frameTitulo, text='LEDs dançando ao som da música (ouvindo pelo microfone)')
+	lblTitulo.pack(fill=BOTH,expand=1)
+
+	frameIniciar = LabelFrame(frame)
+	frameIniciar.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	btnIniciar = Button(frameIniciar, text='Iniciar/Parar')
+	btnIniciar.pack(fill=BOTH,expand=1)
+
+	lblFPS = Label(frameIniciar, text='FPS 50 / 50')
+	lblFPS.pack(fill=BOTH,expand=1)
+
 def construir_cores(self, frame):
 	""" Função para construir a tela de cores únicas para enviar aos LEDs
 	"""
-
 	coluna = 3
 	linha = config.linhasCores
 
@@ -167,7 +227,6 @@ def construir_efeitos(self, frame):
 	for efeito, val in efeitos:
 		Radiobutton(frameEfeitos, text=efeito, indicatoron = 0, value=val, relief=FLAT).pack(fill=BOTH,expand=1,pady=5,padx=5)
 
-
 def construir_serverled(self, frame, app):
 	""" Função para construir a tela do serverLED. A comunicação via UDP
 	"""
@@ -246,7 +305,6 @@ def construir_config_app(self, frame):
 	sclQtdLinhasCores = Scale(appConfigCoresFrame, from_=3, to=10, sliderlength=15, orient=HORIZONTAL)
 	sclQtdLinhasCores.set(config.linhasCores)
 	sclQtdLinhasCores.grid(row=0,column=1)
-
 
 def construir_configuracoes(self, frame):
 	""" Função para construir a tela das configurações.

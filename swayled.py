@@ -38,6 +38,8 @@ class Aplicativo:
 			self.frameConfigApp.grid_remove()
 			self.frameCores.grid_remove()
 			self.frameEfeitos.grid_remove()
+			self.frameLightpaint.grid_remove()
+			self.frameDancypi.grid_remove()
 
 		if app_iniciando == False: menu_selecionado = self.tvwMenu.selection()[0]
 		else: menu_selecionado = config.janelaDefault
@@ -46,6 +48,8 @@ class Aplicativo:
 
 		if menu_selecionado == 'Cores': self.frameCores.grid(row=1,column=1,sticky=N)
 		elif menu_selecionado == 'Efeitos': self.frameEfeitos.grid(row=1,column=1,sticky=N)
+		elif menu_selecionado == 'Lightpaint': self.frameLightpaint.grid(row=1,column=1,sticky=N)
+		elif menu_selecionado == 'DancyPi': self.frameDancypi.grid(row=1,column=1,sticky=N)
 		elif menu_selecionado == 'Configurações': self.frameConfig.grid(row=1,column=1,sticky=N)
 		elif menu_selecionado == 'ServerLED': self.frameServerled.grid(row=1,column=1,sticky=N)
 		elif menu_selecionado == 'Aplicativo': self.frameConfigApp.grid(row=1,column=1,sticky=N)
@@ -83,6 +87,8 @@ class Aplicativo:
 		self.frameConfigApp = Frame(principal)
 		self.frameCores = Frame(principal)
 		self.frameEfeitos = Frame(principal)
+		self.frameLightpaint = Frame(principal)
+		self.frameDancypi = Frame(principal)
 
 		# Função para construir o menu do aplicativo e as configurações
 		self.construir_menu()
@@ -91,6 +97,8 @@ class Aplicativo:
 		construir_config_app(principal, self.frameConfigApp)
 		construir_cores(principal, self.frameCores)
 		construir_efeitos(principal, self.frameEfeitos)
+		construir_lightpaint(principal, self.frameLightpaint)
+		construir_dancyPi(principal, self.frameDancypi)
 
 		self.mudar_tela(app_iniciando=True)
 
