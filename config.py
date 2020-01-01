@@ -5,7 +5,7 @@
 linhasCores = 6
 
 # Janela padrão em que o aplicativo é aberto
-janelaDefault = 'Lightpaint'
+janelaDefault = 'ServerLED'
 
 #Configuração UDP
 udp = {'ip': '192.168.0.31', 'porta': 12000}
@@ -14,7 +14,7 @@ udp = {'ip': '192.168.0.31', 'porta': 12000}
 led = [{
 		'tipo': 'ws2812b',
 		'pino': '18',
-		'qtd': 120,
+		'qtd': 144+120,
 		'inverter': False,
 		'volts': '5v',
 		'ampere_pixel_min': 20,

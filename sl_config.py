@@ -4,13 +4,16 @@
 # Stack Tooltip: https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
 
 import config
+import socket
 
 import_neopixel = True
 try:
 	import neopixel
+	import leds
 except: 
 	import_neopixel = False
-
+	print('import_neopixel: {}'.format(import_neopixel))
+# import leds
 try:
 	# Python 3
 	from tkinter import *
@@ -20,6 +23,8 @@ except ImportError:
 	# Python 2
 	from Tkinter import *
 	from ttk import Combobox as Combobox
+
+comunicacao_udp = False
 
 class CreateToolTip(object):
     """
@@ -74,9 +79,50 @@ class CreateToolTip(object):
         if tw:
             tw.destroy()
 
-class funcionalidades:
+class Funcionalidades:
+
 	def iniciar_UDP(self):
-		print('Iniciando conexão UDP...')
+		global comunicacao_udp
+		
+		if comunicacao_udp:
+			comunicacao_udp = False
+			self.btnIniciarUDP['text'] = 'Iniciar comunicação...'
+		else:
+			comunicacao_udp = True
+			self.btnIniciarUDP['text'] = '-------------- Parar comunicação ---------------'
+
+
+	def rgb(x, self):
+		R = self.sclRvar.get()
+		G = self.sclGvar.get()
+		B = self.sclBvar.get()
+
+		self.lblR['text'] = R
+		self.lblG['text'] = G
+		self.lblB['text'] = B
+
+		self.lblCorAtualRGB['bg'] = '#%02x%02x%02x' % (R,G,B)
+
+		if import_neopixel: leds.por_rgb(R,G,B)
+
+class Configuracoes:
+	"""
+	Class que armazena funções para ler e gravar configurações que serão lidas/gravadas pelo aplicativo.
+	"""
+	def __init__(self):
+		#Valores padrão do aplicativo
+		self._janela_padrao = 'Cores'
+		self._linhas_em_cores = 6
+		self._udp_ip = socket.gethostbyname(hostname)
+		self._udp_port = 12000
+
+	def obter_janela_padrao(self): pass
+	def obter_linhas_em_cores(self): pass
+	def obter_udp(self): pass
+
+	def gravar_janela_padrao(self): pass
+	def gravar_linhas_em_cores(self): pass
+	def gravar_udp(self): pass
 
 def construir_lightpaint(self, frame):
 
@@ -127,7 +173,7 @@ def construir_dancyPi(self, frame):
 	frameTitulo = LabelFrame(frame)
 	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
 
-	lblTitulo = Label(frameTitulo, text='LEDs dançando ao som da música (ouvindo pelo microfone)')
+	lblTitulo = Label(frameTitulo, text='LEDs dançando ao som da música\n(ouvindo pelo microfone)')
 	lblTitulo.pack(fill=BOTH,expand=1)
 
 	frameIniciar = LabelFrame(frame)
@@ -142,6 +188,7 @@ def construir_dancyPi(self, frame):
 def construir_cores(self, frame):
 	""" Função para construir a tela de cores únicas para enviar aos LEDs
 	"""
+
 	coluna = 3
 	linha = config.linhasCores
 
@@ -155,7 +202,16 @@ def construir_cores(self, frame):
 	frameDesligarCores.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
 
 	btnDesligarCores = Button(frameDesligarCores, text='Desligar')
+	if import_neopixel: btnDesligarCores['command'] = leds.desligar
 	btnDesligarCores.pack(fill=BOTH,expand=1)
+
+	lblBrilho = Label(frameDesligarCores, text='Brilho:')
+	lblBrilho.pack(fill=BOTH,expand=1)
+
+	sclBrilho = Scale(frameDesligarCores, from_=0, to=255, sliderlength=15, orient=HORIZONTAL, command=lambda x: leds.alterar_brilho(sclBrilho.get()))
+	sclBrilho.set(40)
+	if import_neopixel: leds.alterar_brilho(sclBrilho.get())
+	sclBrilho.pack(fill=BOTH,expand=1)
 
 	frameCoresBtn = LabelFrame(frame)
 	frameCoresBtn.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
@@ -163,7 +219,7 @@ def construir_cores(self, frame):
 	c = 0
 	l = 0
 
-	rgb = ['#FF0000', '#00FF00', '#0000FF']
+	rgb = ['#FF0000', '#00FF00', '#0000FF', '#FFFFFF']
 	add = 255/(linha-1)
 
 	def hex_to_color(h):
@@ -172,42 +228,80 @@ def construir_cores(self, frame):
 	def color_to_hex(r,g,b):
 		return '#%02x%02x%02x' % (r, g, b)
 
-	for i in range(linha*coluna):
+	# Variável armazenará todos os botões para as cores
+	btnCor = {}
 
-		r,g,b = hex_to_color(rgb[c])
+	"""
+	Para as cores, serão 4 colunas: LED vermelho, Azul, Verde e o Branco.
+	A última linha deve ser: Amarelo, Verde-água e Rosa. #FFFF00, #00FFFF e #FF00FF respectivamente.
 
-		if c == 0:
-			g += add*l
-		elif c == 1:
-			b += add*l
-		elif c == 2:
-			r += add*l
+	Dependendo de quantas linhas forem configuradas,
+	a cor dessas linhas será dividida proporcionalmente ao número de botões em uma coluna.
+	"""
+ 
+	for i in range((linha*coluna)+1):
 
+		# Obtendo a cor primária da coluna (primeira linha) e transformando em tuple
+		r, g, b = hex_to_color(rgb[c])
+
+		# Alterando a variável da cor que será construída com base na coluna
+		if c == 0: g += add*l
+		elif c == 1: b += add*l
+		elif c == 2: r += add*l
+
+		# Transformando em hexadecimal a nova cor
 		bg = color_to_hex(int(r), int(g), int(b))
 
+		# Definindo a ação de cada botão sobre que cor enviar para os LEDs.
+		try: acao = lambda x = bg: leds.cores(x)
+		except: pass
 
-		btnCor = Button(frameCoresBtn, bg=bg, width=3, height=1)
-		btnCor.grid(row=l, column=c, padx=10,pady=10)
+		# Construindo o botão
+		btnCor[bg] = Button(frameCoresBtn, bg=bg, width=3, height=1, command=acao)
+		btnCor[bg].grid(row=l, column=c, padx=10,pady=10)
+
+		# Acrescenta que uma linha foi preenchida
 		l += 1
+
+		# Caso não for a primeira linha e der a quantidade de linhas que devem ser preenchidas
+		# Reinicie a var de linha e acrescente um a var de coluna
 		if i != 0 and (i+1) % linha == 0:
 			c += 1
 			l = 0
-		if i == len(range(linha*coluna))-1:
-			btnCor = Button(frameCoresBtn, bg='#fff', width=3, height=1)
-			btnCor.grid(row=l, column=c, padx=10,pady=10)
 
 	frameCoresScale = LabelFrame(frame)
 	frameCoresScale.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
 
-	slrR = Scale(frameCoresScale, from_=0, to=255, sliderlength=15)
-	slrG = Scale(frameCoresScale, from_=0, to=255, sliderlength=15)
-	slrB = Scale(frameCoresScale, from_=0, to=255, sliderlength=15)
-	slrW = Scale(frameCoresScale, from_=0, to=100, sliderlength=15)
+	self.sclRvar = IntVar()
+	self.sclGvar = IntVar()
+	self.sclBvar = IntVar()
 
-	slrR.grid(row=0,column=0)
-	slrG.grid(row=0,column=1)
-	slrB.grid(row=0,column=2)
-	slrW.grid(row=0,column=3)
+	self.sclR = Scale(frameCoresScale, from_=0, length=200, to=255, showvalue=False, sliderlength=15, orient=HORIZONTAL,variable=self.sclRvar,command=lambda x: Funcionalidades().rgb(self))
+	self.sclG = Scale(frameCoresScale, from_=0, length=200, to=255, showvalue=False, sliderlength=15, orient=HORIZONTAL,variable=self.sclGvar,command=lambda x: Funcionalidades().rgb(self))
+	self.sclB = Scale(frameCoresScale, from_=0, length=200, to=255, showvalue=False, sliderlength=15, orient=HORIZONTAL,variable=self.sclBvar,command=lambda x: Funcionalidades().rgb(self))
+
+	self.lblR = Label(frameCoresScale, text=self.sclRvar.get(), width=3)
+	self.lblG = Label(frameCoresScale, text=self.sclGvar.get(), width=3)
+	self.lblB = Label(frameCoresScale, text=self.sclBvar.get(), width=3)
+
+	Label(frameCoresScale, text='R:').grid(row=0,column=0)
+	self.lblR.grid(row=0,column=1)
+	self.sclR.grid(row=0,column=2)
+
+	Label(frameCoresScale, text='G:').grid(row=1,column=0)
+	self.lblG.grid(row=1,column=1)
+	self.sclG.grid(row=1,column=2)
+
+	Label(frameCoresScale, text='B:').grid(row=2,column=0)
+	self.lblB.grid(row=2,column=1)
+	self.sclB.grid(row=2,column=2)
+
+	frameCorAtualRGB = LabelFrame(frameCoresScale)
+	frameCorAtualRGB.grid(row=3,column=0,columnspan=5)
+
+	self.lblCorAtualRGB = Label(frameCorAtualRGB, text='',  width=33)
+	self.lblCorAtualRGB['bg'] = '#000000'
+	self.lblCorAtualRGB.pack(fill=BOTH, expand=1)
 
 def construir_efeitos(self, frame):
 	""" Função para construir a tela de efeitos
@@ -227,6 +321,17 @@ def construir_efeitos(self, frame):
 	for efeito, val in efeitos:
 		Radiobutton(frameEfeitos, text=efeito, indicatoron = 0, value=val, relief=FLAT).pack(fill=BOTH,expand=1,pady=5,padx=5)
 
+	frameConfigEfeitos = LabelFrame(frame)
+	frameConfigEfeitos.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
+
+	Label(frameConfigEfeitos, text='Velocidade do efeito').pack()
+	Label(frameConfigEfeitos, text='Mais lento').pack(side=LEFT)
+	Label(frameConfigEfeitos, text='Mais rápido').pack(side=RIGHT)
+
+	sclVelEfeito = Scale(frameConfigEfeitos, from_=-50, to=50, sliderlength=15,orient=HORIZONTAL,showvalue=False)
+	sclVelEfeito.bind('<Double-Button-1>', lambda x: sclVelEfeito.set(0))
+	sclVelEfeito.pack(fill=BOTH,expand=1)
+
 def construir_serverled(self, frame, app):
 	""" Função para construir a tela do serverLED. A comunicação via UDP
 	"""
@@ -240,16 +345,16 @@ def construir_serverled(self, frame, app):
 	frameClienteServidor = LabelFrame(frame)
 	frameClienteServidor.pack(fill=BOTH,expand=1,padx=(0,10))
 
-	opcoesClienteServidor = ['Vou usar esse app para enviar os LEDs', 'Vou receber e ligar os LEDs nesse app']
+	opcoesClienteServidor = ['Vou usar esse app para enviar os LEDs pela rede', 'Vou receber e ligar os LEDs nesse dispositivo']
 
-	lblAtencao = Label(frameClienteServidor, text='LEDs não foram configurados, portanto')
+	lblAtencao = Label(frameClienteServidor, text='LEDs não estão disponíveis nesse dispositivo, portanto...', fg='red')
 	if import_neopixel == False:
-		lblAtencao.pack(anchor=W)
-		opcoesClienteServidor = ['Vou usar esse app para enviar os LEDs']
+		lblAtencao.pack(anchor='w')
+		opcoesClienteServidor = opcoesClienteServidor[0].split(maxsplit=0)
 	
 	cbxCliServ = Combobox(frameClienteServidor)
 	cbxCliServ['values'] = opcoesClienteServidor
-	cbxCliServ.set('Vou usar esse app para disparar os LEDs')
+	cbxCliServ.set(opcoesClienteServidor[0])
 	cbxCliServ.pack(fill=BOTH,expand=1)
 
 	frameUDP = LabelFrame(frame, text='Rede')
@@ -269,9 +374,9 @@ def construir_serverled(self, frame, app):
 	txtPorta.insert(0, config.udp['porta'])
 	txtPorta.grid(row=0,column=3)
 
-	btnIniciarUDP = Button(frameUDP, text='Iniciar comunicação...')
-	btnIniciarUDP['command'] = lambda: funcionalidades.iniciar_UDP(app)
-	btnIniciarUDP.grid(row=1,column=0, columnspan=5, sticky=W+E)
+	self.btnIniciarUDP = Button(frameUDP, text='Iniciar comunicação...')
+	self.btnIniciarUDP['command'] = lambda: Funcionalidades.iniciar_UDP(self)
+	self.btnIniciarUDP.grid(row=1,column=0, columnspan=5, sticky=W+E)
 
 def construir_config_app(self, frame):
 	""" Função para construir a tela das configurações.
@@ -325,6 +430,14 @@ def construir_configuracoes(self, frame):
 	tipos_de_leds = ['ws2812b', '5050']
 	pinos_dos_leds = ['18']
 
+	lblTipoLED = Label(ledsConfigFrame, text='Tipo:')
+	lblPinoLED = Label(ledsConfigFrame, text='Pino:')
+	lblQtdPixelsLED = Label(ledsConfigFrame, text='LEDs:')
+
+	lblTipoLED.grid(row=0,column=1, sticky=W)	
+	lblPinoLED.grid(row=0,column=2, sticky=W)
+	lblQtdPixelsLED.grid(row=0,column=3, sticky=W)
+
 	def construir_configs_leds(linha):
 
 		# Por estar em testes, desabilitarei apenas para terminar de construir a interface
@@ -333,42 +446,30 @@ def construir_configuracoes(self, frame):
 
 		lblLED = Label(ledsConfigFrame, text='LED {}:'.format(linha+1))
 		lblLED['state'] = estado_widgets
-		lblLED.grid(row=linha,column=0)
-
-		lblTipoLED = Label(ledsConfigFrame, text='Tipo')
-		lblTipoLED['state'] = estado_widgets
-		lblTipoLED.grid(row=linha,column=1)
+		lblLED.grid(row=linha+1,column=0)
 
 		cbxTiposLED = Combobox(ledsConfigFrame,width=8)
 		cbxTiposLED['values'] = tipos_de_leds
 		cbxTiposLED['state'] = estado_widgets
 		cbxTiposLED.set(config.led[linha]['tipo'])
-		cbxTiposLED.grid(row=linha,column=2, padx=(0,10))
-
-		lblPinoLED = Label(ledsConfigFrame, text='Pino')
-		lblPinoLED['state'] = estado_widgets
-		lblPinoLED.grid(row=linha,column=3)
+		cbxTiposLED.grid(row=linha+1,column=1, padx=(0,10))
 
 		cbxPinosLED = Combobox(ledsConfigFrame,width=4)
 		cbxPinosLED['values'] = pinos_dos_leds
 		cbxPinosLED['state'] = estado_widgets
 		cbxPinosLED.set(config.led[linha]['pino'])
-		cbxPinosLED.grid(row=linha,column=4, padx=(0,10))
-
-		lblQtdPixelsLED = Label(ledsConfigFrame, text='Pixels')
-		lblQtdPixelsLED['state'] = estado_widgets		
-		lblQtdPixelsLED.grid(row=linha,column=5)
+		cbxPinosLED.grid(row=linha+1,column=2, padx=(0,10))
 
 		txtQtdPixelsLED = Entry(ledsConfigFrame, width=5)
 		txtQtdPixelsLED['state'] = estado_widgets
 		txtQtdPixelsLED.insert(0, config.led[linha]['qtd'])
-		txtQtdPixelsLED.grid(row=linha,column=6, padx=(0,10))
+		txtQtdPixelsLED.grid(row=linha+1,column=3, padx=(0,10))
 
 		varInverterLED = BooleanVar()
 		varInverterLED.set(config.led[linha]['inverter'])
 		cbxInverterLED = Checkbutton(ledsConfigFrame, text="Inverter", var=varInverterLED)
 		cbxInverterLED['state'] = DISABLED # EM TESTES...
-		cbxInverterLED.grid(row=linha, column=7)
+		cbxInverterLED.grid(row=linha+1, column=7)
 
 	def construir_energia_leds(linha):
 		# Por estar em testes, desabilitarei apenas para terminar de construir a interface

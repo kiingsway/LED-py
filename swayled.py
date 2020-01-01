@@ -33,26 +33,55 @@ class Aplicativo:
 
 	def mudar_tela(self, app_iniciando=False):
 		def fechar_todas_as_telas():
-			self.frameConfig.grid_remove()
-			self.frameServerled.grid_remove()
-			self.frameConfigApp.grid_remove()
-			self.frameCores.grid_remove()
-			self.frameEfeitos.grid_remove()
-			self.frameLightpaint.grid_remove()
-			self.frameDancypi.grid_remove()
+			# self.frameConfig.grid_remove()
+			self.frameConfig.destroy()
+			self.frameServerled.destroy()
+			self.frameConfigApp.destroy()
+			self.frameCores.destroy()
+			self.frameEfeitos.destroy()
+			self.frameLightpaint.destroy()
+			self.frameDancypi.destroy()
 
 		if app_iniciando == False: menu_selecionado = self.tvwMenu.selection()[0]
 		else: menu_selecionado = config.janelaDefault
 
 		fechar_todas_as_telas()
+		
+		if menu_selecionado == 'Cores':
+			self.frameCores.grid(row=1,column=1,sticky=N)
+			construir_cores(principal, self.frameCores)
+		
+		elif menu_selecionado == 'Efeitos':
+			construir_efeitos(principal, self.frameEfeitos)
+			self.frameEfeitos.grid(row=1,column=1,sticky=N)
+		
+		elif menu_selecionado == 'Lightpaint':
+			construir_lightpaint(principal, self.frameLightpaint)
+			self.frameLightpaint.grid(row=1,column=1,sticky=N)
+		
+		elif menu_selecionado == 'DancyPi':
+			construir_dancyPi(principal, self.frameDancypi)
+			self.frameDancypi.grid(row=1,column=1,sticky=N)
+		
+		elif menu_selecionado == u'Configurações':
+			construir_configuracoes(principal, self.frameConfig)
+			self.frameConfig.grid(row=1,column=1,sticky=N)
+		
+		elif menu_selecionado == 'ServerLED':
+			construir_serverled(principal, self.frameServerled, Aplicativo)
+			self.frameServerled.grid(row=1,column=1,sticky=N)
+		
+		elif menu_selecionado == 'Aplicativo':
+			construir_config_app(principal, self.frameConfigApp)
+			self.frameConfigApp.grid(row=1,column=1,sticky=N)
 
-		if menu_selecionado == 'Cores': self.frameCores.grid(row=1,column=1,sticky=N)
-		elif menu_selecionado == 'Efeitos': self.frameEfeitos.grid(row=1,column=1,sticky=N)
-		elif menu_selecionado == 'Lightpaint': self.frameLightpaint.grid(row=1,column=1,sticky=N)
-		elif menu_selecionado == 'DancyPi': self.frameDancypi.grid(row=1,column=1,sticky=N)
-		elif menu_selecionado == 'Configurações': self.frameConfig.grid(row=1,column=1,sticky=N)
-		elif menu_selecionado == 'ServerLED': self.frameServerled.grid(row=1,column=1,sticky=N)
-		elif menu_selecionado == 'Aplicativo': self.frameConfigApp.grid(row=1,column=1,sticky=N)
+		# if menu_selecionado == 'Cores': self.frameCores.grid(row=1,column=1,sticky=N)
+		# elif menu_selecionado == 'Efeitos': self.frameEfeitos.grid(row=1,column=1,sticky=N)
+		# elif menu_selecionado == 'Lightpaint': self.frameLightpaint.grid(row=1,column=1,sticky=N)
+		# elif menu_selecionado == 'DancyPi': self.frameDancypi.grid(row=1,column=1,sticky=N)
+		# elif menu_selecionado == u'Configurações': self.frameConfig.grid(row=1,column=1,sticky=N)
+		# elif menu_selecionado == 'ServerLED': self.frameServerled.grid(row=1,column=1,sticky=N)
+		# elif menu_selecionado == 'Aplicativo': self.frameConfigApp.grid(row=1,column=1,sticky=N)
 
 	def construir_menu(self):
 		''' Definição usada para construir o menu do app.
@@ -92,19 +121,17 @@ class Aplicativo:
 
 		# Função para construir o menu do aplicativo e as configurações
 		self.construir_menu()
-		construir_configuracoes(principal, self.frameConfig)
-		construir_serverled(principal, self.frameServerled, Aplicativo)
-		construir_config_app(principal, self.frameConfigApp)
-		construir_cores(principal, self.frameCores)
-		construir_efeitos(principal, self.frameEfeitos)
-		construir_lightpaint(principal, self.frameLightpaint)
-		construir_dancyPi(principal, self.frameDancypi)
+		# construir_configuracoes(principal, self.frameConfig)
+		# construir_serverled(principal, self.frameServerled, Aplicativo)
+		# construir_config_app(principal, self.frameConfigApp)
+		# construir_cores(principal, self.frameCores)
+		# construir_efeitos(principal, self.frameEfeitos)
+		# construir_lightpaint(principal, self.frameLightpaint)
+		# construir_dancyPi(principal, self.frameDancypi)
 
 		self.mudar_tela(app_iniciando=True)
 
 principal = Tk()
 Aplicativo(principal)
-# principal.geometry("722x399")
-# principal.minsize(722, 399)
 principal.title('Sway LED')
 principal.mainloop()
