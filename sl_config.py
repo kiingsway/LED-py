@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Stack Tooltip: https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
+# Stack CreateToolTip: https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
 
+import os
 import config
 import socket
 
@@ -83,7 +84,7 @@ class Funcionalidades:
 
 	def iniciar_UDP(self):
 		global comunicacao_udp
-		
+
 		if comunicacao_udp:
 			comunicacao_udp = False
 			self.btnIniciarUDP['text'] = 'Iniciar comunicação...'
@@ -116,13 +117,44 @@ class Configuracoes:
 		self._udp_ip = socket.gethostbyname(hostname)
 		self._udp_port = 12000
 
-	def obter_janela_padrao(self): pass
+		# Setando variável para as configurações
+		self.config = configparser.ConfigParser()
+
+	def obter_janela_padrao(self):
+		# Lê o arquivo config.ini
+		self.config.read('config.ini')
+		print('Li o config.ini, ou tentei')
+
+		# Se a configuração tiver Top Busca, usa como variável. Se não, retorna o valor padrão.
+		if self.config.has_option('Configurações','Janela padrão'): return self.config['Configuracoes']['Janela padrão']
+		else: return self._janela_padrao
+
 	def obter_linhas_em_cores(self): pass
 	def obter_udp(self): pass
 
-	def gravar_janela_padrao(self): pass
+	def gravar_janela_padrao(self):
+		print('Gravando janela padrão...')
+		try:
+			arquivoConfig = open('{}\\config.ini'.format(os.getcwd()),'w')
+			try:
+				Config.add_section('Busca dos chamados')
+			except configparser.DuplicateSectionError:
+				Config.has_section('Busca dos chamados')
+
+			Config.set('Busca dos chamados', 'View Padrão', view)
+			Config.set('Busca dos chamados', 'Top busca', top)
+			Config.write(arquivoConfig)
+			arquivoConfig.close()
+
+		except Exception as error:
+			tituloErro = 'Erro ao salvar a configuração.'
+			mensagemErro = '{}: {}'.format(type(error).__name__, error)
+			messagebox.showerror(tituloErro, mensagemErro)
+
 	def gravar_linhas_em_cores(self): pass
 	def gravar_udp(self): pass
+
+	janela_padrao = property(obter_janela_padrao, gravar_janela_padrao,)
 
 def construir_lightpaint(self, frame):
 
@@ -332,7 +364,7 @@ def construir_efeitos(self, frame):
 	sclVelEfeito.bind('<Double-Button-1>', lambda x: sclVelEfeito.set(0))
 	sclVelEfeito.pack(fill=BOTH,expand=1)
 
-def construir_serverled(self, frame, app):
+def construir_serverled(self, frame):
 	""" Função para construir a tela do serverLED. A comunicação via UDP
 	"""
 
@@ -375,7 +407,7 @@ def construir_serverled(self, frame, app):
 	txtPorta.grid(row=0,column=3)
 
 	self.btnIniciarUDP = Button(frameUDP, text='Iniciar comunicação...')
-	self.btnIniciarUDP['command'] = lambda: Funcionalidades.iniciar_UDP(self)
+	self.btnIniciarUDP['command'] = lambda: Funcionalidades().iniciar_UDP(self)
 	self.btnIniciarUDP.grid(row=1,column=0, columnspan=5, sticky=W+E)
 
 def construir_config_app(self, frame):
@@ -396,9 +428,14 @@ def construir_config_app(self, frame):
 
 	janelas = ['Cores', 'Efeitos', 'Lightpaint', 'DancyPi', 'Server LED', 'Configurações', '-- Aplicativo']
 
+	def set_janelaPadrao(x):
+		print('Setando janela padrão')
+		Configuracoes.janela_padrao = x.widget.get()
+
 	cbxJanelaDefault = Combobox(appConfigFrame)
 	cbxJanelaDefault['values'] = janelas
-	cbxJanelaDefault.set(config.janelaDefault)
+	cbxJanelaDefault.set(Configuracoes.janela_padrao)
+	cbxJanelaDefault.bind("<<ComboboxSelected>>", lambda x: set_janelaPadrao(x))
 	cbxJanelaDefault.grid(row=0,column=1)
 
 	appConfigCoresFrame = LabelFrame(frame, text='Cores')

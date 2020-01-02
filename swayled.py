@@ -28,12 +28,34 @@ except ImportError:
 
 class Aplicativo:
 
+	def __init__(self, master=None):
+		
+		# Frames para serem mostrados
+		self.frameCores = Frame(principal)
+		self.frameEfeitos = Frame(principal)
+		self.frameLightpaint = Frame(principal)
+		self.frameDancypi = Frame(principal)
+		self.frameServerled = Frame(principal)
+		self.frameConfig = Frame(principal)
+		self.frameConfigApp = Frame(principal)
+
+		# Função para construir o menu do aplicativo
+		self.construir_menu()
+		# construir_configuracoes(principal, self.frameConfig)
+		# construir_serverled(principal, self.frameServerled, Aplicativo)
+		# construir_config_app(principal, self.frameConfigApp)
+		# construir_cores(principal, self.frameCores)
+		# construir_efeitos(principal, self.frameEfeitos)
+		# construir_lightpaint(principal, self.frameLightpaint)
+		# construir_dancyPi(principal, self.frameDancypi)
+
+		self.mudar_tela(app_iniciando=True)
+
 	def alterar_UDP(self):
 		self.tvwMenu.item('serverLED', values=('ServerLED', 'A'))
 
 	def mudar_tela(self, app_iniciando=False):
 		def fechar_todas_as_telas():
-			# self.frameConfig.grid_remove()
 			self.frameConfig.destroy()
 			self.frameServerled.destroy()
 			self.frameConfigApp.destroy()
@@ -41,15 +63,26 @@ class Aplicativo:
 			self.frameEfeitos.destroy()
 			self.frameLightpaint.destroy()
 			self.frameDancypi.destroy()
+		
+			# Frames para serem mostrados
+			self.frameCores = Frame(principal)
+			self.frameEfeitos = Frame(principal)
+			self.frameLightpaint = Frame(principal)
+			self.frameDancypi = Frame(principal)
+			self.frameServerled = Frame(principal)
+			self.frameConfig = Frame(principal)
+			self.frameConfigApp = Frame(principal)
 
-		if app_iniciando == False: menu_selecionado = self.tvwMenu.selection()[0]
+		if app_iniciando == False:
+			fechar_todas_as_telas()
+			menu_selecionado = self.tvwMenu.selection()[0]
 		else: menu_selecionado = config.janelaDefault
 
-		fechar_todas_as_telas()
+		# fechar_todas_as_telas()
 		
 		if menu_selecionado == 'Cores':
-			self.frameCores.grid(row=1,column=1,sticky=N)
 			construir_cores(principal, self.frameCores)
+			self.frameCores.grid(row=1,column=1,sticky=N)
 		
 		elif menu_selecionado == 'Efeitos':
 			construir_efeitos(principal, self.frameEfeitos)
@@ -68,7 +101,7 @@ class Aplicativo:
 			self.frameConfig.grid(row=1,column=1,sticky=N)
 		
 		elif menu_selecionado == 'ServerLED':
-			construir_serverled(principal, self.frameServerled, Aplicativo)
+			construir_serverled(principal, self.frameServerled)
 			self.frameServerled.grid(row=1,column=1,sticky=N)
 		
 		elif menu_selecionado == 'Aplicativo':
@@ -106,30 +139,6 @@ class Aplicativo:
 
 		self.tvwMenu.bind('<<TreeviewSelect>>', lambda x: self.mudar_tela())
 		self.tvwMenu.grid(row=1, column=0)
-
-
-	def __init__(self, master=None):
-		
-		# Frames para serem mostrados
-		self.frameConfig = Frame(principal)
-		self.frameServerled = Frame(principal)
-		self.frameConfigApp = Frame(principal)
-		self.frameCores = Frame(principal)
-		self.frameEfeitos = Frame(principal)
-		self.frameLightpaint = Frame(principal)
-		self.frameDancypi = Frame(principal)
-
-		# Função para construir o menu do aplicativo e as configurações
-		self.construir_menu()
-		# construir_configuracoes(principal, self.frameConfig)
-		# construir_serverled(principal, self.frameServerled, Aplicativo)
-		# construir_config_app(principal, self.frameConfigApp)
-		# construir_cores(principal, self.frameCores)
-		# construir_efeitos(principal, self.frameEfeitos)
-		# construir_lightpaint(principal, self.frameLightpaint)
-		# construir_dancyPi(principal, self.frameDancypi)
-
-		self.mudar_tela(app_iniciando=True)
 
 principal = Tk()
 Aplicativo(principal)

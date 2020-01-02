@@ -5,9 +5,9 @@
 linhasCores = 6
 
 # Janela padrão em que o aplicativo é aberto
-janelaDefault = 'ServerLED'
+janelaDefault = 'Cores'
 
-#Configuração UDP
+# Configuração UDP
 udp = {'ip': '192.168.0.31', 'porta': 12000}
 
 # Configuração dos LEDs
