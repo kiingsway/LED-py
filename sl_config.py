@@ -4,8 +4,9 @@
 # Stack CreateToolTip: https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
 
 import os
-import config
+import config # Deve ser substituído pelo configparser
 import socket
+import configparser
 
 import_neopixel = True
 try:
@@ -18,6 +19,7 @@ except:
 try:
 	# Python 3
 	from tkinter import *
+	from tkinter import messagebox
 	import tkinter.ttk as ttk
 	from tkinter.ttk import Combobox
 except ImportError:
@@ -114,36 +116,22 @@ class Configuracoes:
 		#Valores padrão do aplicativo
 		self._janela_padrao = 'Cores'
 		self._linhas_em_cores = 6
-		self._udp_ip = socket.gethostbyname(hostname)
+		self._udp_ip = socket.gethostbyname(socket.gethostname())
 		self._udp_port = 12000
 
 		# Setando variável para as configurações
 		self.config = configparser.ConfigParser()
 
-	def obter_janela_padrao(self):
-		# Lê o arquivo config.ini
-		self.config.read('config.ini')
-		print('Li o config.ini, ou tentei')
-
-		# Se a configuração tiver Top Busca, usa como variável. Se não, retorna o valor padrão.
-		if self.config.has_option('Configurações','Janela padrão'): return self.config['Configuracoes']['Janela padrão']
-		else: return self._janela_padrao
-
-	def obter_linhas_em_cores(self): pass
-	def obter_udp(self): pass
-
-	def gravar_janela_padrao(self):
-		print('Gravando janela padrão...')
+	def gravar_configuracao(self, secao, propiedade, valor):
 		try:
 			arquivoConfig = open('{}\\config.ini'.format(os.getcwd()),'w')
 			try:
-				Config.add_section('Busca dos chamados')
+				self.config.add_section(secao)
 			except configparser.DuplicateSectionError:
-				Config.has_section('Busca dos chamados')
+				self.config.has_section(secao)
 
-			Config.set('Busca dos chamados', 'View Padrão', view)
-			Config.set('Busca dos chamados', 'Top busca', top)
-			Config.write(arquivoConfig)
+			self.config.set(secao, propiedade, valor)
+			self.config.write(arquivoConfig)
 			arquivoConfig.close()
 
 		except Exception as error:
@@ -151,10 +139,31 @@ class Configuracoes:
 			mensagemErro = '{}: {}'.format(type(error).__name__, error)
 			messagebox.showerror(tituloErro, mensagemErro)
 
-	def gravar_linhas_em_cores(self): pass
-	def gravar_udp(self): pass
+	def obter_janela_padrao(self):
+		# Lê o arquivo config.ini
+		self.config.read('config.ini')
 
-	janela_padrao = property(obter_janela_padrao, gravar_janela_padrao,)
+		# Se a configuração tiver Top Busca, usa como variável. Se não, retorna o valor padrão.
+		if self.config.has_option('Aplicativo','Janela padrão'): return self.config['Aplicativo']['Janela padrão']
+		else: return self._janela_padrao
+
+	def obter_linhas_em_cores(self): pass
+
+	def obter_udp(self):
+		print('Obtendo udp...')
+
+	def gravar_janela_padrao(self, janela):
+		secao = 'Aplicativo'
+		propiedade = 'Janela padrão'
+
+		self.gravar_configuracao(secao, propiedade, janela)
+
+	def gravar_linhas_em_cores(self): pass
+	def gravar_udp(self):
+		print('Gravando udp...')
+
+	janela_padrao = property(obter_janela_padrao, gravar_janela_padrao)
+	udp = property(obter_udp, gravar_udp)
 
 def construir_lightpaint(self, frame):
 
@@ -240,7 +249,9 @@ def construir_cores(self, frame):
 	lblBrilho = Label(frameDesligarCores, text='Brilho:')
 	lblBrilho.pack(fill=BOTH,expand=1)
 
-	sclBrilho = Scale(frameDesligarCores, from_=0, to=255, sliderlength=15, orient=HORIZONTAL, command=lambda x: leds.alterar_brilho(sclBrilho.get()))
+	try: sclBrilho = Scale(frameDesligarCores, from_=0, to=255, sliderlength=15, orient=HORIZONTAL, command=lambda x: leds.alterar_brilho(sclBrilho.get()))
+	except: sclBrilho = Scale(frameDesligarCores, from_=0, to=255, sliderlength=15, orient=HORIZONTAL)
+
 	sclBrilho.set(40)
 	if import_neopixel: leds.alterar_brilho(sclBrilho.get())
 	sclBrilho.pack(fill=BOTH,expand=1)
@@ -392,6 +403,11 @@ def construir_serverled(self, frame):
 	frameUDP = LabelFrame(frame, text='Rede')
 	frameUDP.pack(fill=BOTH,expand=1,padx=(0,10))
 
+	def set_udpIP(w):
+		print('w:',w)
+		Configuracoes().udp = w.widget.get()
+	def set_udpPORT(w, valor): Configuracoes().udp = w.widget.get()
+
 	lblIP = Label(frameUDP, text='IP:')
 	lblIP.grid(row=0,column=0)
 
@@ -410,6 +426,9 @@ def construir_serverled(self, frame):
 	self.btnIniciarUDP['command'] = lambda: Funcionalidades().iniciar_UDP(self)
 	self.btnIniciarUDP.grid(row=1,column=0, columnspan=5, sticky=W+E)
 
+	txtIP.bind('<KeyRelease>', lambda x: set_udpIP(x))
+	txtPorta.bind('<KeyRelease>', lambda x: set_udpIP(x))
+
 def construir_config_app(self, frame):
 	""" Função para construir a tela das configurações.
 	"""
@@ -426,15 +445,13 @@ def construir_config_app(self, frame):
 	lblJanelaDefault = Label(appConfigFrame, text='Iniciar na janela:')
 	lblJanelaDefault.grid(row=0,column=0)
 
-	janelas = ['Cores', 'Efeitos', 'Lightpaint', 'DancyPi', 'Server LED', 'Configurações', '-- Aplicativo']
+	janelas = ['Cores', 'Efeitos', 'Lightpaint', 'DancyPi', 'ServerLED', 'Configurações', 'Aplicativo']
 
-	def set_janelaPadrao(x):
-		print('Setando janela padrão')
-		Configuracoes.janela_padrao = x.widget.get()
+	def set_janelaPadrao(x): Configuracoes().janela_padrao = x.widget.get()
 
 	cbxJanelaDefault = Combobox(appConfigFrame)
 	cbxJanelaDefault['values'] = janelas
-	cbxJanelaDefault.set(Configuracoes.janela_padrao)
+	cbxJanelaDefault.set(Configuracoes().janela_padrao)
 	cbxJanelaDefault.bind("<<ComboboxSelected>>", lambda x: set_janelaPadrao(x))
 	cbxJanelaDefault.grid(row=0,column=1)
 
