@@ -7,6 +7,7 @@ import os
 import config # Deve ser substituído pelo configparser
 import socket
 import configparser
+from pathlib import Path
 
 import_neopixel = True
 try:
@@ -14,7 +15,6 @@ try:
 	import leds
 except: 
 	import_neopixel = False
-	print('import_neopixel: {}'.format(import_neopixel))
 # import leds
 try:
 	# Python 3
@@ -111,59 +111,157 @@ class Funcionalidades:
 class Configuracoes:
 	"""
 	Class que armazena funções para ler e gravar configurações que serão lidas/gravadas pelo aplicativo.
+	Para criar uma configuração:
+		1- Apague o config.ini
+		2- Altere a def criar_config para criar as configurações
+		3- Dê um valor padrão em __init__
+		4- Crie um Obter copiano dos outros Obter
+		5- Crie um Gravar copiano dos outros Gravar
+		6- Configure o READ na variável.
+			6a- Se for Var() ou CBX faça .set(<valor>)
+			6b- Se for Entry faça .insert(0, <valor>)
+		7- Confiure o UPDATE na variável
+			7a- Faça um def antes da widget set_<configuração>
+			7b- Caso for SCALE, use ['command'] = lambda x: set_<configuração>(x)
+			7c- Caso for ENTRY, use txt<widget>.bind('<KeyRelease>', lambda x: set_<configuração>(x))
+			7d- Caso for COMBOBOX, use cbx<widget>.bind("<<ComboboxSelected>>", lambda x: set_<configuração>(x))
 	"""
+
+	def criar_config(self, arquivo):
+	    """
+	    Create a config file
+	    """
+	    config = configparser.ConfigParser()
+	    config.add_section("Aplicativo")
+	    config.set("Aplicativo", "Janela padrão", self._janela_padrao)
+	    config.set("Aplicativo", "Linhas em cores", self._linhas_em_cores)
+
+	    config.add_section("Rede")
+	    config.set("Rede", "IP", self._udp_ip)
+	    config.set("Rede", "Porta", self._udp_port)
+	    
+	    config.add_section("LED1")
+	    config.set("LED1", "Tipo", self._led1_tipo)
+	    config.set("LED1", "Pino", self._led1_pino)
+	    config.set("LED1", "Qtd", self._led1_qtd)
+
+	    with open(arquivo, "w") as config_file:
+	        config.write(config_file)
+
 	def __init__(self):
-		#Valores padrão do aplicativo
+		# Valores padrão do aplicativo
 		self._janela_padrao = 'Cores'
-		self._linhas_em_cores = 6
+		self._linhas_em_cores = '6'
 		self._udp_ip = socket.gethostbyname(socket.gethostname())
-		self._udp_port = 12000
+		self._udp_port = '12000'
+		self._led1_tipo = 'ws2812b'
+		self._led1_pino = '18'
+		self._led1_qtd = '144'
+
+		self.pasta_atual = '\\'.join(str(Path(__file__).absolute()).split('\\')[0:-1])
+		self.arquivo = '\\config.ini'
+		self.caminho_arquivo = self.pasta_atual + self.arquivo
 
 		# Setando variável para as configurações
 		self.config = configparser.ConfigParser()
+		
+		# Se o arquivo config.ini não existir, criar outro
+		if not os.path.exists(self.caminho_arquivo): self.criar_config(self.caminho_arquivo)
 
 	def gravar_configuracao(self, secao, propiedade, valor):
-		try:
-			arquivoConfig = open('{}\\config.ini'.format(os.getcwd()),'w')
-			try:
-				self.config.add_section(secao)
-			except configparser.DuplicateSectionError:
-				self.config.has_section(secao)
+		self.config.read(self.caminho_arquivo)
+		# Change a value in the config
+		self.config.set(secao, propiedade, valor)
 
-			self.config.set(secao, propiedade, valor)
-			self.config.write(arquivoConfig)
-			arquivoConfig.close()
-
-		except Exception as error:
-			tituloErro = 'Erro ao salvar a configuração.'
-			mensagemErro = '{}: {}'.format(type(error).__name__, error)
-			messagebox.showerror(tituloErro, mensagemErro)
+		# Write changes back to the config file
+		with open(self.caminho_arquivo, "w") as config_file:
+			self.config.write(config_file)
 
 	def obter_janela_padrao(self):
 		# Lê o arquivo config.ini
-		self.config.read('config.ini')
+		self.config.read(self.caminho_arquivo)
 
-		# Se a configuração tiver Top Busca, usa como variável. Se não, retorna o valor padrão.
-		if self.config.has_option('Aplicativo','Janela padrão'): return self.config['Aplicativo']['Janela padrão']
-		else: return self._janela_padrao
+		# Retorna no widget
+		return self.config.get('Aplicativo', 'Janela padrão')
 
-	def obter_linhas_em_cores(self): pass
+	def obter_linhas_em_cores(self):
+		# Lê o arquivo config.ini
+		self.config.read(self.caminho_arquivo)
+
+		# Retorna no widget
+		return self.config.get('Aplicativo', 'Linhas em cores')
 
 	def obter_udp(self):
-		print('Obtendo udp...')
+		# Lê o arquivo config.ini
+		self.config.read(self.caminho_arquivo)
 
-	def gravar_janela_padrao(self, janela):
+		# Retorna no widget
+		return (self.config.get('Rede', 'IP'), self.config.get('Rede', 'Porta'))
+
+	def obter_led1_tipo(self):
+		# Lê o arquivo config.ini
+		self.config.read(self.caminho_arquivo)
+
+		# Retorna no widget
+		return self.config.get('LED1', 'Tipo')
+
+	def obter_led1_pino(self):
+		# Lê o arquivo config.ini
+		self.config.read(self.caminho_arquivo)
+
+		# Retorna no widget
+		return self.config.get('LED1', 'Pino')
+
+	def obter_led1_qtd(self):
+		# Lê o arquivo config.ini
+		self.config.read(self.caminho_arquivo)
+
+		# Retorna no widget
+		return self.config.get('LED1', 'Qtd')
+
+	def gravar_janela_padrao(self, valor):
 		secao = 'Aplicativo'
 		propiedade = 'Janela padrão'
+		self.gravar_configuracao(secao, propiedade, valor)
 
-		self.gravar_configuracao(secao, propiedade, janela)
+	def gravar_linhas_em_cores(self, valor):
+		secao = 'Aplicativo'
+		propiedade = 'Linhas em cores'
+		self.gravar_configuracao(secao, propiedade, valor)
 
-	def gravar_linhas_em_cores(self): pass
-	def gravar_udp(self):
-		print('Gravando udp...')
+	def gravar_udp_ip(self, valor):
+		secao = 'Rede'
+		propiedade = 'IP'
+		self.gravar_configuracao(secao, propiedade, valor)
 
+	def gravar_udp_port(self, valor):
+		secao = 'Rede'
+		propiedade = 'Porta'
+		self.gravar_configuracao(secao, propiedade, valor)
+
+	def gravar_led1_tipo(self, valor):
+		secao = 'LED1'
+		propiedade = 'Tipo'
+		self.gravar_configuracao(secao, propiedade, valor)
+
+	def gravar_led1_pino(self, valor):
+		secao = 'LED1'
+		propiedade = 'Pino'
+		self.gravar_configuracao(secao, propiedade, valor)
+
+	def gravar_led1_qtd(self, valor):
+		secao = 'LED1'
+		propiedade = 'Qtd'
+		self.gravar_configuracao(secao, propiedade, valor)
+
+	
+	linhas_cores = property(obter_linhas_em_cores, gravar_linhas_em_cores)
 	janela_padrao = property(obter_janela_padrao, gravar_janela_padrao)
-	udp = property(obter_udp, gravar_udp)
+	udp_ip = property(obter_udp, gravar_udp_ip)
+	udp_port = property(obter_udp, gravar_udp_port)
+	led1_tipo = property(obter_led1_tipo, gravar_led1_tipo)
+	led1_pino = property(obter_led1_pino, gravar_led1_pino)
+	led1_qtd = property(obter_led1_qtd, gravar_led1_qtd)
 
 def construir_lightpaint(self, frame):
 
@@ -229,9 +327,9 @@ def construir_dancyPi(self, frame):
 def construir_cores(self, frame):
 	""" Função para construir a tela de cores únicas para enviar aos LEDs
 	"""
-
+	
 	coluna = 3
-	linha = config.linhasCores
+	linha = int(Configuracoes().linhas_cores)
 
 	frameTitulo = LabelFrame(frame)
 	frameTitulo.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
@@ -250,7 +348,7 @@ def construir_cores(self, frame):
 	lblBrilho.pack(fill=BOTH,expand=1)
 
 	try: sclBrilho = Scale(frameDesligarCores, from_=0, to=255, sliderlength=15, orient=HORIZONTAL, command=lambda x: leds.alterar_brilho(sclBrilho.get()))
-	except: sclBrilho = Scale(frameDesligarCores, from_=0, to=255, sliderlength=15, orient=HORIZONTAL)
+	except NameError: sclBrilho = Scale(frameDesligarCores, from_=0, to=255, sliderlength=15, orient=HORIZONTAL)
 
 	sclBrilho.set(40)
 	if import_neopixel: leds.alterar_brilho(sclBrilho.get())
@@ -359,10 +457,17 @@ def construir_efeitos(self, frame):
 	frameEfeitos = LabelFrame(frame)
 	frameEfeitos.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
 
-	efeitos = [('Desligado','0'),('Arco íris','1')]
+	# print('\n')
+	efeitosVar = StringVar()
+	efeitos = [("Desligado","Desligado"),("ArcoIris",1)]
 
 	for efeito, val in efeitos:
-		Radiobutton(frameEfeitos, text=efeito, indicatoron = 0, value=val, relief=FLAT).pack(fill=BOTH,expand=1,pady=5,padx=5)
+		# print('Efeito:', efeito, '- Val:', val)
+		Radiobutton(frameEfeitos, text=efeito, indicatoron = 0, variable=efeitosVar, value=val, relief=FLAT).pack(fill=BOTH,expand=1,pady=5,padx=5)
+
+	# print('\n')
+	# efeitosVar.set('Desligado')
+	# print(efeitosVar.get())
 
 	frameConfigEfeitos = LabelFrame(frame)
 	frameConfigEfeitos.pack(fill=BOTH,expand=1,pady=(0,10),padx=(0,10))
@@ -403,23 +508,21 @@ def construir_serverled(self, frame):
 	frameUDP = LabelFrame(frame, text='Rede')
 	frameUDP.pack(fill=BOTH,expand=1,padx=(0,10))
 
-	def set_udpIP(w):
-		print('w:',w)
-		Configuracoes().udp = w.widget.get()
-	def set_udpPORT(w, valor): Configuracoes().udp = w.widget.get()
+	def set_udpIP(x): Configuracoes().udp_ip = x.widget.get()
+	def set_udpPORT(x): Configuracoes().udp_port = x.widget.get()
 
 	lblIP = Label(frameUDP, text='IP:')
 	lblIP.grid(row=0,column=0)
 
 	txtIP = Entry(frameUDP)
-	txtIP.insert(0, config.udp['ip'])
+	txtIP.insert(0, Configuracoes().udp_ip[0])
 	txtIP.grid(row=0,column=1)
 
 	lblPorta = Label(frameUDP, text='Porta:')
 	lblPorta.grid(row=0,column=2)
 
 	txtPorta = Entry(frameUDP)
-	txtPorta.insert(0, config.udp['porta'])
+	txtPorta.insert(0, Configuracoes().udp_port[1])
 	txtPorta.grid(row=0,column=3)
 
 	self.btnIniciarUDP = Button(frameUDP, text='Iniciar comunicação...')
@@ -427,7 +530,7 @@ def construir_serverled(self, frame):
 	self.btnIniciarUDP.grid(row=1,column=0, columnspan=5, sticky=W+E)
 
 	txtIP.bind('<KeyRelease>', lambda x: set_udpIP(x))
-	txtPorta.bind('<KeyRelease>', lambda x: set_udpIP(x))
+	txtPorta.bind('<KeyRelease>', lambda x: set_udpPORT(x))
 
 def construir_config_app(self, frame):
 	""" Função para construir a tela das configurações.
@@ -461,8 +564,12 @@ def construir_config_app(self, frame):
 	lblQtdLinhasCores = Label(appConfigCoresFrame, text='Quantas linhas na tabela de Cores:')
 	lblQtdLinhasCores.grid(row=0,column=0,sticky=S)
 
-	sclQtdLinhasCores = Scale(appConfigCoresFrame, from_=3, to=10, sliderlength=15, orient=HORIZONTAL)
-	sclQtdLinhasCores.set(config.linhasCores)
+	def set_colunaCores(x):	Configuracoes().linhas_cores = QtdLinhasCoresVar.get()
+
+	QtdLinhasCoresVar = StringVar()
+	QtdLinhasCoresVar.set(Configuracoes().linhas_cores)
+	sclQtdLinhasCores = Scale(appConfigCoresFrame, variable=QtdLinhasCoresVar, from_=3, to=10, sliderlength=15, orient=HORIZONTAL)
+	sclQtdLinhasCores['command'] = lambda x: set_colunaCores(x)
 	sclQtdLinhasCores.grid(row=0,column=1)
 
 def construir_configuracoes(self, frame):
@@ -495,6 +602,8 @@ def construir_configuracoes(self, frame):
 	def construir_configs_leds(linha):
 
 		# Por estar em testes, desabilitarei apenas para terminar de construir a interface
+		# Apenas a primeira linha está programada. Para adicionar mais, precisa mudar as variáveis aqui e nas Configuracoes
+		# Caso for usar mais, precisa adicionar opções para selecionar os LEDs em cada tela
 		if linha > 0: estado_widgets = DISABLED
 		else: estado_widgets = NORMAL
 
@@ -502,22 +611,28 @@ def construir_configuracoes(self, frame):
 		lblLED['state'] = estado_widgets
 		lblLED.grid(row=linha+1,column=0)
 
+		def set_led1_tipo(x): Configuracoes().led1_tipo = cbxTiposLED.get()
 		cbxTiposLED = Combobox(ledsConfigFrame,width=8)
 		cbxTiposLED['values'] = tipos_de_leds
 		cbxTiposLED['state'] = estado_widgets
-		cbxTiposLED.set(config.led[linha]['tipo'])
+		cbxTiposLED.set(Configuracoes().led1_tipo)
 		cbxTiposLED.grid(row=linha+1,column=1, padx=(0,10))
+		cbxTiposLED.bind("<<ComboboxSelected>>", lambda x: set_led1_tipo(x))
 
+		def set_led1_pino(x): Configuracoes().led1_pino = cbxPinosLED.get()
 		cbxPinosLED = Combobox(ledsConfigFrame,width=4)
 		cbxPinosLED['values'] = pinos_dos_leds
 		cbxPinosLED['state'] = estado_widgets
-		cbxPinosLED.set(config.led[linha]['pino'])
+		cbxPinosLED.set(Configuracoes().led1_pino)
 		cbxPinosLED.grid(row=linha+1,column=2, padx=(0,10))
+		cbxPinosLED.bind("<<ComboboxSelected>>", lambda x: set_led1_pino(x))
 
+		def set_led1Qtd(x):	Configuracoes().led1_qtd = txtQtdPixelsLED.get()
 		txtQtdPixelsLED = Entry(ledsConfigFrame, width=5)
 		txtQtdPixelsLED['state'] = estado_widgets
-		txtQtdPixelsLED.insert(0, config.led[linha]['qtd'])
+		txtQtdPixelsLED.insert(0, Configuracoes().led1_qtd)
 		txtQtdPixelsLED.grid(row=linha+1,column=3, padx=(0,10))
+		txtQtdPixelsLED.bind('<KeyRelease>', lambda x: set_led1Qtd(x))
 
 		varInverterLED = BooleanVar()
 		varInverterLED.set(config.led[linha]['inverter'])
@@ -538,19 +653,21 @@ def construir_configuracoes(self, frame):
 		lblVolts['state'] = estado_widgets
 		lblVolts['text'] = config.led[linha]['volts']		
 		lblVolts.grid(row=linha,column=1, padx=(0,10))
+
+		qtd = int(Configuracoes().led1_qtd)
 		
 		conta_amperes_leds = '{} leds = {}A ~ {}A'.format(
-			config.led[linha]['qtd'],
-			config.led[linha]['qtd'] * config.led[linha]['ampere_pixel_min'] / 1000,
-			config.led[linha]['qtd'] * config.led[linha]['ampere_pixel_max'] / 1000
+			qtd,
+			qtd * config.led[linha]['ampere_pixel_min'] / 1000,
+			qtd * config.led[linha]['ampere_pixel_max'] / 1000
 			)
 		
 		conta_amperes_ledsFULL = '{0} leds * {1}mA /1000 = {2}A (mínimo)\n{0} leds * {3}mA /1000 = {4}A (máximo)'.format(
-			config.led[linha]['qtd'],
+			qtd,
 			config.led[linha]['ampere_pixel_min'],
-			config.led[linha]['qtd'] * config.led[linha]['ampere_pixel_min'] / 1000,
+			qtd * config.led[linha]['ampere_pixel_min'] / 1000,
 			config.led[linha]['ampere_pixel_max'],			
-			config.led[linha]['qtd'] * config.led[linha]['ampere_pixel_max'] / 1000
+			qtd * config.led[linha]['ampere_pixel_max'] / 1000
 			)
 
 		lblAmpere = Label(ledsEnergiaFrame)

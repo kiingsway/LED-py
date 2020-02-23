@@ -48,63 +48,45 @@ class Aplicativo:
 
 	def mudar_tela(self, app_iniciando=False):
 		def fechar_todas_as_telas():
-			"""
-			Destrói todas as janelas para serem recriadas novamente.
-			"""
-			self.frameConfig.destroy()
-			self.frameServerled.destroy()
-			self.frameConfigApp.destroy()
-			self.frameCores.destroy()
-			self.frameEfeitos.destroy()
-			self.frameLightpaint.destroy()
-			self.frameDancypi.destroy()
-		
-			# Frames para serem mostrados
-			self.frameCores = Frame(principal)
-			self.frameEfeitos = Frame(principal)
-			self.frameLightpaint = Frame(principal)
-			self.frameDancypi = Frame(principal)
-			self.frameServerled = Frame(principal)
-			self.frameConfig = Frame(principal)
-			self.frameConfigApp = Frame(principal)
 
-		if app_iniciando == False:
+			# Remove todas as janelas
+			self.frameConfig.grid_remove()
+			self.frameServerled.grid_remove()
+			self.frameConfigApp.grid_remove()
+			self.frameCores.grid_remove()
+			self.frameEfeitos.grid_remove()
+			self.frameLightpaint.grid_remove()
+			self.frameDancypi.grid_remove()
+
+		def construir_as_coisas():
+			# Janelas sendo construídas no fundo.
+			construir_cores(principal, self.frameCores)
+			construir_efeitos(principal, self.frameEfeitos)
+			construir_lightpaint(principal, self.frameLightpaint)
+			construir_dancyPi(principal, self.frameDancypi)
+			construir_configuracoes(principal, self.frameConfig)
+			construir_serverled(principal, self.frameServerled)
+			construir_config_app(principal, self.frameConfigApp)
+
+		if app_iniciando:
+			# Se o app estiver iniciando, setar que a tela salva nas configs abrirá
+			# E construa todas as janelas no fundo
+			menu_selecionado = Configuracoes().janela_padrao
+			construir_as_coisas() 
+
+		else:
+			# Se o app já estiver iniciado, feche todas as janelas e
+			# Abra a janela que o usuário selecionou no menu
 			fechar_todas_as_telas()
 			menu_selecionado = self.tvwMenu.selection()[0]
-
-		# else: menu_selecionado = config.janelaDefault
-		else: menu_selecionado = Configuracoes().janela_padrao
-
-		print('Menu selecionado:', menu_selecionado)
-
 		
-		if menu_selecionado == 'Cores':
-			construir_cores(principal, self.frameCores)
-			self.frameCores.grid(row=1,column=1,sticky=N)
-		
-		elif menu_selecionado == 'Efeitos':
-			construir_efeitos(principal, self.frameEfeitos)
-			self.frameEfeitos.grid(row=1,column=1,sticky=N)
-		
-		elif menu_selecionado == 'Lightpaint':
-			construir_lightpaint(principal, self.frameLightpaint)
-			self.frameLightpaint.grid(row=1,column=1,sticky=N)
-		
-		elif menu_selecionado == 'DancyPi':
-			construir_dancyPi(principal, self.frameDancypi)
-			self.frameDancypi.grid(row=1,column=1,sticky=N)
-		
-		elif menu_selecionado == u'Configurações':
-			construir_configuracoes(principal, self.frameConfig)
-			self.frameConfig.grid(row=1,column=1,sticky=N)
-		
-		elif menu_selecionado == 'ServerLED':
-			construir_serverled(principal, self.frameServerled)
-			self.frameServerled.grid(row=1,column=1,sticky=N)
-		
-		elif menu_selecionado == 'Aplicativo':
-			construir_config_app(principal, self.frameConfigApp)
-			self.frameConfigApp.grid(row=1,column=1,sticky=N)
+		if menu_selecionado == 'Cores': self.frameCores.grid(row=1,column=1,sticky=N)		
+		elif menu_selecionado == 'Efeitos': self.frameEfeitos.grid(row=1,column=1,sticky=N)		
+		elif menu_selecionado == 'Lightpaint': self.frameLightpaint.grid(row=1,column=1,sticky=N)		
+		elif menu_selecionado == 'DancyPi': self.frameDancypi.grid(row=1,column=1,sticky=N)		
+		elif menu_selecionado == u'Configurações': self.frameConfig.grid(row=1,column=1,sticky=N)		
+		elif menu_selecionado == 'ServerLED': self.frameServerled.grid(row=1,column=1,sticky=N)		
+		elif menu_selecionado == 'Aplicativo': self.frameConfigApp.grid(row=1,column=1,sticky=N)
 
 	def construir_menu(self):
 		''' Definição usada para construir o menu do app.

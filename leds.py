@@ -31,6 +31,7 @@ def cores(h,fitaled=0):
 		return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
 
 	r,g,b = hex_to_color(h)
+	# Fazer um GOTO da última cor que colocaram para a selecionada 2.0
 
 	for pos in range(config.led[fitaled]['qtd']):
 		strip.setPixelColor(pos,Color(g,r,b))
