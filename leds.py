@@ -1,12 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import config
-from neopixel import *
+# import config
+try: from neopixel import *
+except: pass
+import configparser
+from pathlib import Path
+import os
+
+pasta_atual = '\\'.join(str(Path(__file__).absolute()).split('\\')[0:-1])
+# pasta_atual = os.getcwd()
+arquivo = '\\config.ini'
+caminho_arquivo = pasta_atual + arquivo
+
+config = configparser.ConfigParser()
+config.read(caminho_arquivo, encoding='iso-8859-1')
 
 # LED strip configuration:
-LED_COUNT      = config.led[0]['qtd']     # Number of LED pixels.
-LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
+LED_COUNT      = int(config.get("LED1", "qtd"))     # Number of LED pixels.
+LED_PIN        = int(config.get("LED1", "pino"))      # GPIO pin connected to the pixels (18 uses PWM!).
 LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
 LED_DMA        = 10      # DMA channel to use for generating signal (try 10)
 LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
@@ -20,8 +32,8 @@ strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, 
 strip.begin()
 
 def desligar(fitaled=0):
-	print(config.led[fitaled]['qtd'])
-	for pos in range(config.led[fitaled]['qtd']):
+
+	for pos in range(LED_COUNT):
 		strip.setPixelColor(pos,Color(0,0,0))
 	strip.show()
 
@@ -33,7 +45,7 @@ def cores(h,fitaled=0):
 	r,g,b = hex_to_color(h)
 	# Fazer um GOTO da última cor que colocaram para a selecionada 2.0
 
-	for pos in range(config.led[fitaled]['qtd']):
+	for pos in range(LED_COUNT):
 		strip.setPixelColor(pos,Color(g,r,b))
 	strip.show()
 
@@ -42,6 +54,6 @@ def alterar_brilho(brilho):
 	strip.show()
 
 def por_rgb(r,g,b, fitaled=0):
-	for pos in range(config.led[fitaled]['qtd']):
+	for pos in range(LED_COUNT):
 		strip.setPixelColor(pos, Color(g,r,b))
 	strip.show()

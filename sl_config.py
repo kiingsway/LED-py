@@ -13,9 +13,11 @@ import_neopixel = True
 try:
 	import neopixel
 	import leds
-except: 
+except:
 	import_neopixel = False
-# import leds
+	class leds:
+		def alterar_brilho(x): pass
+
 try:
 	# Python 3
 	from tkinter import *
