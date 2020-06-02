@@ -1,0 +1,24 @@
+{
+    "ui config": {
+        "linhas em cores": 5,
+        "iniciar na janela": "Cores"
+    },
+    "net config": {
+        "UPD_PORT": 12000,
+        "UPD_IP": "192.168.1.2"
+    },
+    "led config": [
+        {
+            "LED_PIN": 18,
+            "LED_COUNT": 144,
+            "LED_TYPE": "ws2812b",
+            "LED_INVERT": false
+        },
+        {
+            "LED_PIN": 18,
+            "LED_COUNT": 120,
+            "LED_TYPE": "ws2812b",
+            "LED_INVERT": false
+        }
+    ]
+}
