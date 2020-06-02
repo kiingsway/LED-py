@@ -210,17 +210,26 @@ class ConstruirAplicacao:
 		frameClienteServidor = LabelFrame(frame)
 		frameClienteServidor.pack(fill=BOTH,expand=1,padx=(10,10))
 
+		cbxCliServ = Combobox(frameClienteServidor)
+
 		opcoesClienteServidor = ['Vou usar esse app para enviar os LEDs pela rede', 'Vou receber e ligar os LEDs nesse dispositivo']
+		opcoesCombobox = opcoesClienteServidor
+
+		def alterar_udp(*args):
+			send_udp = cbxCliServ.get() == opcoesClienteServidor[0]
+
+			self.config.send_udp = send_udp
 
 		lblAtencao = Label(frameClienteServidor, text='LEDs não estão disponíveis nesse dispositivo, portanto...', fg='red')
 		if self.led.neopixel_importado == False:
 			lblAtencao.pack(anchor='w')
-			opcoesClienteServidor = opcoesClienteServidor[0].split(maxsplit=0)
-		
-		cbxCliServ = Combobox(frameClienteServidor)
-		cbxCliServ['values'] = opcoesClienteServidor
-		cbxCliServ.set(opcoesClienteServidor[0])
+			del opcoesCombobox[1]
+			alterar_udp()
+		cbxCliServ['values'] = opcoesCombobox
+		cbxCliServ.set(opcoesCombobox[0])
 		cbxCliServ.pack(fill=BOTH,expand=1)
+
+		cbxCliServ.bind("<<ComboboxSelected>>", alterar_udp)
 
 		frameUDP = LabelFrame(frame, text='Rede')
 		frameUDP.pack(fill=BOTH,expand=1,padx=(10,10))
@@ -233,7 +242,7 @@ class ConstruirAplicacao:
 
 			self.config.udp = (ipVar.get(), port)
 
-			self.var_status_leds.set("Sem LED importado.\n Enviando para {}, {}".format(ipVar.get(), port))
+			if not led.neopixel_importado: self.var_status_leds.set("Sem LED importado.\n Enviando para\nIP: {}, Port: {}".format(ipVar.get(), port))
 
 		lblIP = Label(frameUDP, text='IP:')
 		lblIP.grid(row=0,column=0)
@@ -478,7 +487,7 @@ if __name__ == '__main__':
 
 	a = ConstruirAplicacao(app, statusVar)
 
-	a.construir_cores(testFrame)
+	a.construir_serverled(testFrame)
 	# a.construir_serverled(testFrame)
 
 	app.mainloop()

@@ -5,7 +5,8 @@
     },
     "net config": {
         "UPD_PORT": 12000,
-        "UPD_IP": "192.168.1.2"
+        "UPD_IP": "192.168.1.2",
+        "SEND_UDP": true
     },
     "led config": [
         {

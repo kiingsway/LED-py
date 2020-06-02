@@ -35,7 +35,7 @@ class Config:
 
 		led_config = [{'LED_TYPE':'ws2812b', 'LED_COUNT': 120, 'LED_PIN': 18, 'LED_INVERT': False}] * self.fitas_conectadas
 		ui_config = {'iniciar na janela': 'Cores', 'linhas em cores': 6}
-		net_config = {'UPD_IP': '192.168.1.1', 'UPD_PORT': 12000}
+		net_config = {'UPD_IP': '192.168.1.1', 'UPD_PORT': 12000, 'SEND_UDP': True}
 
 		config_data = {'led config': led_config, 'ui config': ui_config, 'net config': net_config}
 
@@ -177,6 +177,28 @@ class Config:
 
 			data['net config']['UPD_IP'] = ip
 			data['net config']['UPD_PORT'] = int(port)
+
+			json.dump(data, config_json, indent=4)
+	
+
+
+	@property
+	def send_udp(self):
+
+		with open(self.caminho_arquivo_config, 'r') as config_json: data = json.load(config_json)
+
+		return data['net config']['SEND_UDP']
+
+	@udp.setter
+	def send_udp(self, value):
+
+		with open(self.caminho_arquivo_config, 'r') as config_json:
+			
+			data = json.load(config_json)			
+
+		with open(self.caminho_arquivo_config, 'w') as config_json:
+
+			data['net config']['SEND_UDP'] = value
 
 			json.dump(data, config_json, indent=4)
 
