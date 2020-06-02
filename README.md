@@ -1,2 +1,48 @@
 # LED-py
-Projeto usando RaspberryPi 3 e um LED W2812b.
+### Projeto usando RaspberryPi 3 e um LED W2812b.
+
+Abaixo um progresso do projeto (46,42%):
+- [ ] Cores (66%)
+	- [x] UI
+	- [x] Alterar LEDs
+		- [x] Alterar no PC (via UDP)
+		- [x] Alterar no RPi
+	- [ ] Receber Cores via UDP
+- [ ] Efeitos (33%)
+	- [x] UI
+	- [ ] Alterar Efeitos
+		- [ ] Alterar no PC (via UDP)
+		- [ ] Alterar no RPi
+	- [ ] Receber Efeitos via UDP
+- [ ] Lightpaint (0%)
+	- [ ] UI
+	- [ ] Alterar Lightpaint
+		- [ ] Alterar no PC (via UDP)
+		- [ ] Alterar no RPi
+	- [ ] Receber Lightpaint via UDP
+- [ ] DancyPi (0%)
+	- [ ] UI
+	- [ ] Alterar DancyPi
+		- [ ] Alterar no PC (via UDP)
+		- [ ] Alterar no RPi
+	- [ ] Receber DancyPi via UDP
+- [ ] ServerLED (66%)
+	- [x] UI
+	- [x] Salvar quando valor alterado
+	- [ ] Receber sempre via UDP
+		- [ ] Informar no Status de onde receberá
+- [ ] Configurações (60%)
+	- [x] UI
+	- [x] Salvar quando valor alterado
+	- [ ] Configurar mais de um LED trocando os Pinos
+	- [x] Configurar número de LEDs
+		- [x] Salvar
+		- [x] Alterar envio de LEDs
+	- [ ] Inverter LEDs quando selecionado Sim
+- [x] Aplicativo (100%)
+	- [x] UI
+	- [x] Salvar quando qualquer valor alterado
+	- [x] Configurar Iniciar na Janela
+		- [x] Salvar quando valor alterado
+		- [x] Iniciar na janela dependendo da opção
+	- [x] Alterar Cores quando o número de linhas for alterado
