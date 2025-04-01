@@ -1,48 +1,57 @@
 # LED-py
-### Projeto usando RaspberryPi 3 e um LED W2812b.
+### Project using Raspberry Pi 3 and a W2812b LED.
 
-Abaixo um progresso do projeto (46,42%):
-- [ ] Cores (66%)
+This project should be executed using the file "**swayled2.py**" on a Raspberry Pi with a W2812b LED strip.
+
+Below is the project progress (**46.42%**):
+
+- [ ] Colors (**66%**)
 	- [x] UI
-	- [x] Alterar LEDs
-		- [x] Alterar no PC (via UDP)
-		- [x] Alterar no RPi
-	- [ ] Receber Cores via UDP
-- [ ] Efeitos (33%)
+	- [x] Change LEDs
+		- [x] Change on PC (via UDP)
+		- [x] Change on RPi
+	- [ ] Receive Colors via UDP
+
+- [ ] Effects (**33%**)
 	- [x] UI
-	- [ ] Alterar Efeitos
-		- [ ] Alterar no PC (via UDP)
-		- [ ] Alterar no RPi
-	- [ ] Receber Efeitos via UDP
-- [ ] Lightpaint (0%)
+	- [ ] Change Effects
+		- [ ] Change on PC (via UDP)
+		- [ ] Change on RPi
+	- [ ] Receive Effects via UDP
+
+- [ ] Lightpaint (**0%**)
 	- [ ] UI
-	- [ ] Alterar Lightpaint
-		- [ ] Alterar no PC (via UDP)
-		- [ ] Alterar no RPi
-	- [ ] Receber Lightpaint via UDP
-- [ ] DancyPi (0%)
+	- [ ] Change Lightpaint
+		- [ ] Change on PC (via UDP)
+		- [ ] Change on RPi
+	- [ ] Receive Lightpaint via UDP
+
+- [ ] DancyPi (**0%**)
 	- [ ] UI
-	- [ ] Alterar DancyPi
-		- [ ] Alterar no PC (via UDP)
-		- [ ] Alterar no RPi
-	- [ ] Receber DancyPi via UDP
-- [ ] ServerLED (66%)
+	- [ ] Change DancyPi
+		- [ ] Change on PC (via UDP)
+		- [ ] Change on RPi
+	- [ ] Receive DancyPi via UDP
+
+- [ ] ServerLED (**66%**)
 	- [x] UI
-	- [x] Salvar quando valor alterado
-	- [ ] Receber sempre via UDP
-		- [ ] Informar no Status de onde receberá
-- [ ] Configurações (60%)
+	- [x] Save when value is changed
+	- [ ] Always receive via UDP
+		- [ ] Display in Status where it will receive from
+
+- [ ] Settings (**60%**)
 	- [x] UI
-	- [x] Salvar quando valor alterado
-	- [ ] Configurar mais de um LED trocando os Pinos
-	- [x] Configurar número de LEDs
-		- [x] Salvar
-		- [x] Alterar envio de LEDs
-	- [ ] Inverter LEDs quando selecionado Sim
-- [x] Aplicativo (100%)
+	- [x] Save when value is changed
+	- [ ] Configure multiple LEDs by changing pins
+	- [x] Configure number of LEDs
+		- [x] Save
+		- [x] Update LED transmission
+	- [ ] Invert LEDs when "Yes" is selected
+
+- [x] Application (**100%**)
 	- [x] UI
-	- [x] Salvar quando qualquer valor alterado
-	- [x] Configurar Iniciar na Janela
-		- [x] Salvar quando valor alterado
-		- [x] Iniciar na janela dependendo da opção
-	- [x] Alterar Cores quando o número de linhas for alterado
+	- [x] Save when any value is changed
+	- [x] Configure "Start in Window"
+		- [x] Save when value is changed
+		- [x] Start in a window depending on the option
+	- [x] Change Colors when the number of rows is modified
